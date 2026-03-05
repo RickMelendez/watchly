@@ -1,7 +1,6 @@
 # Use official Python image
 FROM python:3.11-slim
 
-# Set working directory inside container
 WORKDIR /app
 
 # Install system dependencies
@@ -9,23 +8,18 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
     curl \
-    sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements first (to leverage Docker layer caching)
+# Copy requirements first for better layer caching
 COPY requirements.txt ./
-
-# Copy rest of backend code
-COPY . .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose Flask default port
-EXPOSE 5000
+# Copy the rest of the backend code
+COPY . .
 
-# Set environment variables for Flask
-ENV FLASK_RUN_HOST=0.0.0.0
+# Railway injects $PORT dynamically — healthcheck uses it
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-5000}/ || exit 1
 
-# Start Gunicorn with error logging
-CMD flask db upgrade && gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} main:app --log-level=debug
+# Run DB migrations then start Gunicorn
+CMD flask db upgrade && gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} main:app --log-level=info --timeout 120

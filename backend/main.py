@@ -7,22 +7,8 @@ from app import create_app, db
 from app.models import User, Website, Metric, Alert
 from app.monitor import start_monitoring
 
-# Create the Flask app
+# Create the Flask app (CORS is configured inside create_app via flask-cors)
 app = create_app()
-
-# Set up your allowed origins; adjust for your real Cloudflare domain if needed
-allowed_origins = [
-    origin.strip()
-    for origin in os.getenv("FRONTEND_URL", "http://localhost:3000").split(",")
-]
-
-CORS(
-    app,
-    supports_credentials=True,
-    origins=allowed_origins,
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"]
-)
 
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
@@ -35,34 +21,6 @@ def home():
         data = request.get_json()
         return jsonify({"received": data}), 200
 
-@app.route("/<path:path>", methods=["OPTIONS"])
-def handle_cors_preflight(path):
-    """
-    Manually handle OPTIONS preflight requests (if needed).
-    Flask-CORS typically does this automatically, but you have extra logic here.
-    """
-    origin = request.headers.get("Origin", "")
-    if origin in allowed_origins:
-        response = jsonify({"message": "CORS preflight OK"})
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-        return response, 200
-
-    response = jsonify({"error": "CORS origin not allowed"})
-    return response, 403
-
-@app.after_request
-def apply_cors_headers(response):
-    """Ensure CORS headers are applied to all responses."""
-    origin = request.headers.get("Origin", "")
-    if origin in allowed_origins:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
 
 def initialize_app():
     """

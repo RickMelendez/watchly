@@ -1,92 +1,107 @@
 import React from "react";
 import { motion } from "framer-motion";
-import PropTypes from "prop-types"; // For prop validation
 
-// Helper function to determine color based on value
-const getColor = (title, value) => {
-  switch (title) {
-    case "Uptime":
-      return parseFloat(value) > 99 ? "bg-green-500" : parseFloat(value) > 90 ? "bg-yellow-500" : "bg-red-500";
-    case "Avg Response Time":
-      return parseFloat(value) < 100 ? "bg-green-500" : parseFloat(value) < 300 ? "bg-yellow-500" : "bg-red-500";
-    case "Active Alerts":
-      return value === 0 ? "bg-green-500" : value < 3 ? "bg-yellow-500" : "bg-red-500";
-    default:
-      return "bg-white/10";
+const getAccent = (title, value) => {
+  const num = parseFloat(value);
+  if (title === "Uptime") {
+    if (num >= 99) return { color: "#22c55e", bar: "#22c55e" };
+    if (num >= 90) return { color: "#f59e0b", bar: "#f59e0b" };
+    return { color: "#ef4444", bar: "#ef4444" };
   }
+  if (title === "Avg Response Time") {
+    if (num < 200) return { color: "#22c55e", bar: "#22c55e" };
+    if (num < 500) return { color: "#f59e0b", bar: "#f59e0b" };
+    return { color: "#ef4444", bar: "#ef4444" };
+  }
+  if (title === "Active Alerts") {
+    if (num === 0) return { color: "#22c55e", bar: "#22c55e" };
+    if (num < 3) return { color: "#f59e0b", bar: "#f59e0b" };
+    return { color: "#ef4444", bar: "#ef4444" };
+  }
+  return { color: "#22c55e", bar: "#22c55e" };
 };
 
-// Helper function to calculate width for visual indicators
-const calculateWidth = (title, value) => {
-  switch (title) {
-    case "Uptime":
-      return `${parseFloat(value)}%`;
-    case "Avg Response Time":
-      return `${Math.min(parseFloat(value) / 10, 100)}%`;
-    case "Active Alerts":
-      return `${Math.min(value * 10, 100)}%`;
-    default:
-      return "100%";
-  }
+const getBarWidth = (title, value) => {
+  const num = parseFloat(value);
+  if (title === "Uptime") return `${Math.min(num, 100)}%`;
+  if (title === "Avg Response Time") return `${Math.min((num / 1000) * 100, 100)}%`;
+  if (title === "Active Alerts") return `${Math.min(num * 10, 100)}%`;
+  return "100%";
 };
 
-const StatsGrid = ({ stats }) => {
+export default function StatsGrid({ stats }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-      {stats.map((stat, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-          className="group"
-        >
-          <div className="relative h-full glass rounded-xl overflow-hidden transition-all duration-300 group-hover:translate-y-[-4px] group-hover:shadow-lg shadow-card">
-            {/* Background glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
-            {/* Content */}
-            <div className="p-6 relative z-10">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white/60">{stat.title}</p>
-                  <h3 className="mt-1 text-stat font-bold tracking-tight">
-                    <span className={`${stat.color}`}>{stat.value}</span>
-                  </h3>
-                </div>
-                <div className={`rounded-full p-2 ${stat.color} bg-white/5`}>
-                  <stat.icon className="h-5 w-5" />
-                </div>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+        gap: "0.75rem",
+        marginBottom: "1.25rem",
+      }}
+    >
+      {stats.map((stat, i) => {
+        const accent = getAccent(stat.title, stat.value);
+        const hasBar = ["Uptime", "Avg Response Time", "Active Alerts"].includes(stat.title);
+
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.06 }}
+            className="stat-card"
+          >
+            {/* Header row */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <span className="stat-card-label">{stat.title}</span>
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 7,
+                  background: `${accent.color}15`,
+                  border: `1px solid ${accent.color}30`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <stat.icon size={14} color={accent.color} strokeWidth={2.5} />
               </div>
-              
-              {/* Enhanced visual indicator based on value */}
-              {(stat.title === "Uptime" || stat.title === "Avg Response Time" || stat.title === "Active Alerts") && (
-                <div className="mt-4 w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full ${getColor(stat.title, stat.value)} rounded-full transition-all duration-700 ease-in-out`}
-                    style={{ width: calculateWidth(stat.title, stat.value) }}
-                    aria-label={`${stat.title} indicator`}
-                  ></div>
-                </div>
-              )}
             </div>
-          </div>
-        </motion.div>
-      ))}
+
+            {/* Value */}
+            <div className="stat-card-value" style={{ color: accent.color }}>
+              {stat.value}
+            </div>
+
+            {/* Bar indicator */}
+            {hasBar && (
+              <div
+                style={{
+                  marginTop: "0.875rem",
+                  height: 3,
+                  background: "var(--border)",
+                  borderRadius: 9999,
+                  overflow: "hidden",
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: getBarWidth(stat.title, stat.value) }}
+                  transition={{ duration: 0.8, delay: i * 0.06 + 0.2, ease: "easeOut" }}
+                  style={{
+                    height: "100%",
+                    background: accent.bar,
+                    borderRadius: 9999,
+                  }}
+                />
+              </div>
+            )}
+          </motion.div>
+        );
+      })}
     </div>
   );
-};
-
-// Prop validation
-StatsGrid.propTypes = {
-  stats: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      color: PropTypes.string.isRequired,
-      icon: PropTypes.elementType.isRequired,
-    })
-  ).isRequired,
-};
-
-export default StatsGrid;
+}

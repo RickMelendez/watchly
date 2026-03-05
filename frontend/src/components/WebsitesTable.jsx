@@ -1,259 +1,216 @@
 import React, { useState } from "react";
-import {
-  TrashIcon,
-  ExternalLinkIcon,
-  AlertTriangleIcon,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
-import { Button } from "./ui/button";
+import { ExternalLinkIcon, TrashIcon, AlertTriangleIcon } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
-const WebsitesTable = ({ websites, removeWebsite }) => {
+const formatUrl = (url) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+};
+
+const StatusBadge = ({ isDown, responseTime }) => {
+  const rt = parseFloat(responseTime);
+  if (isDown) {
+    return <span className="badge-down"><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} /> Down</span>;
+  }
+  if (!isNaN(rt) && rt > 500) {
+    return <span className="badge-slow"><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} /> Slow</span>;
+  }
+  return <span className="badge-online"><span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", display: "inline-block", animation: "pulse-dot 2s ease-in-out infinite" }} /> Online</span>;
+};
+
+const ResponseCell = ({ value }) => {
+  if (!value || value === "N/A") return <span style={{ color: "var(--text-muted)", fontFamily: "JetBrains Mono, monospace" }}>—</span>;
+  const num = parseFloat(value);
+  const color = num > 500 ? "#ef4444" : num > 200 ? "#f59e0b" : "#22c55e";
+  return <span style={{ fontFamily: "JetBrains Mono, monospace", color, fontSize: "0.8125rem" }}>{num.toFixed(0)} <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>ms</span></span>;
+};
+
+const UptimeCell = ({ value }) => {
+  const num = parseFloat(value);
+  const color = isNaN(num) ? "var(--text-muted)" : num >= 99 ? "#22c55e" : num >= 90 ? "#f59e0b" : "#ef4444";
+  return <span style={{ fontFamily: "JetBrains Mono, monospace", color, fontSize: "0.8125rem" }}>{isNaN(num) ? "—" : `${num.toFixed(1)}%`}</span>;
+};
+
+export default function WebsitesTable({ websites, removeWebsite }) {
   const { showToast } = useToast();
+  const [hoveredRow, setHoveredRow] = useState(null);
   const [expandedRow, setExpandedRow] = useState(null);
 
   const handleRemove = (id, name) => {
     removeWebsite(id);
-    showToast({
-      title: "Website removed",
-      description: `${name} has been removed from monitoring.`,
-    });
+    if (showToast) showToast({ title: "Removed", description: `${name} removed from monitoring.` });
   };
 
-  const formatUrl = (url) => {
-    try {
-      const urlObj = new URL(url);
-      return urlObj.hostname;
-    } catch {
-      return url;
-    }
-  };
-
-  const toggleRow = (index) => {
-    setExpandedRow(expandedRow === index ? null : index);
-  };
+  if (websites.length === 0) {
+    return (
+      <div
+        style={{
+          padding: "3rem",
+          textAlign: "center",
+          color: "var(--text-muted)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "0.75rem",
+        }}
+      >
+        <AlertTriangleIcon size={32} color="var(--text-muted)" />
+        <p style={{ margin: 0, fontSize: "0.875rem", fontWeight: 500, color: "var(--text-secondary)" }}>
+          No websites monitored yet
+        </p>
+        <p style={{ margin: 0, fontSize: "0.8125rem" }}>
+          Add your first website above to start monitoring.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="overflow-hidden rounded-lg animate-fade-in">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-white/10">
-          <thead className="bg-white/5">
-            <tr>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                Website
-              </th>
-              <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-white/70 uppercase tracking-wider">
-                Status
-              </th>
-              <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-white/70 uppercase tracking-wider">
-                Uptime
-              </th>
-              <th scope="col" className="px-6 py-4 text-center text-xs font-medium text-white/70 uppercase tracking-wider">
-                Response Time
-              </th>
-              <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/10">
-            {websites.length > 0 ? (
-              websites.map((website, index) => (
-                <React.Fragment key={website.id || index}>
-                  <tr
-                    className={`transition-colors duration-150 hover:bg-white/5 cursor-pointer ${
-                      expandedRow === index ? "bg-white/5" : ""
-                    }`}
-                    onClick={() => toggleRow(index)}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-md bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                          <div className={`w-3 h-3 rounded-full ${website.isDown ? "bg-red-500" : "bg-green-500"}`}>
-                            <div className={`w-full h-full rounded-full ${website.isDown ? "" : "animate-ping-slow"} ${website.isDown ? "bg-red-500/50" : "bg-green-500/50"}`}></div>
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="font-medium text-white">{formatUrl(website.url)}</div>
-                          <div className="text-xs text-white/50">{website.url}</div>
-                        </div>
+    <div style={{ overflowX: "auto" }}>
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Website</th>
+            <th>Status</th>
+            <th>Uptime</th>
+            <th>Response Time</th>
+            <th>Frequency</th>
+            <th style={{ textAlign: "right" }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {websites.map((site, i) => (
+            <React.Fragment key={site.id || i}>
+              <tr
+                onMouseEnter={() => setHoveredRow(i)}
+                onMouseLeave={() => setHoveredRow(null)}
+                onClick={() => setExpandedRow(expandedRow === i ? null : i)}
+                style={{ cursor: "pointer", transition: "background 0.1s" }}
+              >
+                {/* # */}
+                <td>
+                  <span style={{ fontFamily: "JetBrains Mono, monospace", color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </td>
+
+                {/* Website */}
+                <td>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                    <div style={{ position: "relative" }}>
+                      <div
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          background: site.isDown ? "#ef4444" : "#22c55e",
+                          boxShadow: site.isDown ? "0 0 6px #ef4444" : "0 0 6px #22c55e",
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 500, color: "var(--text-primary)", fontSize: "0.8125rem" }}>
+                        {formatUrl(site.url)}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        website.isDown
-                          ? "bg-red-500/20 text-red-400"
-                          : "bg-green-500/20 text-green-400"
-                      }`}>
-                        {website.isDown ? (
-                          <>
-                            <XCircle className="w-3 h-3 mr-1" />
-                            Offline
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Online
-                          </>
-                        )}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className={`font-medium ${
-                        parseFloat(website.uptime) < 90
-                          ? "text-red-400"
-                          : parseFloat(website.uptime) < 99
-                          ? "text-yellow-400"
-                          : "text-green-400"
-                      }`}>
-                        {website.uptime}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-white/90">
-                      {website.response_time === "N/A" ? (
-                        <span className="text-white/50">N/A</span>
-                      ) : (
-                        <span className={`${
-                          parseFloat(website.response_time) > 500
-                            ? "text-red-400"
-                            : parseFloat(website.response_time) > 200
-                            ? "text-yellow-400"
-                            : "text-green-400"
-                        }`}>
-                          {website.response_time} ms
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-1">
-                      {/* External Link Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 text-white/50 hover:text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(website.url, "_blank");
-                        }}
-                      >
-                        <ExternalLinkIcon className="h-4 w-4" />
-                      </Button>
+                      <div style={{ fontSize: "0.6875rem", color: "var(--text-muted)", fontFamily: "JetBrains Mono, monospace" }}>
+                        {site.url}
+                      </div>
+                    </div>
+                  </div>
+                </td>
 
-                      {/* Delete Button */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 text-white/50 hover:text-red-400"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemove(website.id, formatUrl(website.url));
-                        }}
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
+                {/* Status */}
+                <td><StatusBadge isDown={site.isDown} responseTime={site.response_time} /></td>
 
-                  {/* Expanded row with additional details */}
-                  {expandedRow === index && (
-                    <tr className="bg-white/5 animate-fade-in">
-                      <td colSpan={5} className="px-6 py-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="bg-white/5 rounded-lg p-4">
-                            <h4 className="text-xs uppercase text-white/60 font-medium mb-2">Monitoring Details</h4>
-                            <div className="space-y-2">
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Check Frequency:</span>
-                                <span className="text-white text-sm">{website.frequency || 60} sec</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Added:</span>
-                                <span className="text-white text-sm">{new Date().toLocaleDateString()}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Last Check:</span>
-                                <span className="text-white text-sm">{new Date().toLocaleTimeString()}</span>
-                              </div>
-                            </div>
-                          </div>
+                {/* Uptime */}
+                <td><UptimeCell value={site.uptime} /></td>
 
-                          <div className="bg-white/5 rounded-lg p-4">
-                            <h4 className="text-xs uppercase text-white/60 font-medium mb-2">Performance</h4>
-                            <div className="space-y-2">
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Today's Uptime:</span>
-                                <span className={`text-sm ${website.isDown ? "text-red-400" : "text-green-400"}`}>
-                                  {website.uptime}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Avg. Response:</span>
-                                <span className="text-white text-sm">{website.response_time}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Status:</span>
-                                <span className={`text-sm ${website.isDown ? "text-red-400" : "text-green-400"}`}>
-                                  {website.isDown ? "Down" : "Up"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
+                {/* Response Time */}
+                <td><ResponseCell value={site.response_time} /></td>
 
-                          <div className="bg-white/5 rounded-lg p-4">
-                            <h4 className="text-xs uppercase text-white/60 font-medium mb-2">Alerts</h4>
-                            <div className="space-y-2">
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Email Alerts:</span>
-                                <span className="text-white text-sm">Enabled</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">SMS Alerts:</span>
-                                <span className="text-white text-sm">Disabled</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-white/60 text-sm">Slack Alerts:</span>
-                                <span className="text-white text-sm">Disabled</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                {/* Frequency */}
+                <td>
+                  <span style={{ fontFamily: "JetBrains Mono, monospace", color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                    {site.frequency ? `${site.frequency}s` : "60s"}
+                  </span>
+                </td>
 
-                        <div className="mt-4 flex justify-end space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs border-white/10 hover:bg-white/10"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemove(website.id, formatUrl(website.url));
-                            }}
-                          >
-                            <TrashIcon className="h-3 w-3 mr-1" /> Remove
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-white/50">
-                  <div className="flex flex-col items-center">
-                    <AlertTriangleIcon className="h-12 w-12 mb-3 text-white/20" />
-                    <p className="text-lg font-medium mb-2">No websites monitored</p>
-                    <p className="max-w-md mx-auto text-sm">
-                      Add your first website to start monitoring its uptime and performance.
-                    </p>
+                {/* Actions */}
+                <td style={{ textAlign: "right" }}>
+                  <div style={{ display: "flex", gap: "0.375rem", justifyContent: "flex-end", opacity: hoveredRow === i ? 1 : 0, transition: "opacity 0.15s" }}>
+                    <button
+                      className="btn-ghost"
+                      style={{ padding: "0.3rem 0.45rem" }}
+                      title="Open website"
+                      onClick={(e) => { e.stopPropagation(); window.open(site.url, "_blank"); }}
+                    >
+                      <ExternalLinkIcon size={13} />
+                    </button>
+                    <button
+                      className="btn-ghost"
+                      style={{ padding: "0.3rem 0.45rem", color: "#ef4444", borderColor: "rgba(239,68,68,0.2)" }}
+                      title="Remove"
+                      onClick={(e) => { e.stopPropagation(); handleRemove(site.id, formatUrl(site.url)); }}
+                    >
+                      <TrashIcon size={13} />
+                    </button>
                   </div>
                 </td>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+
+              {/* Expanded detail row */}
+              {expandedRow === i && (
+                <tr>
+                  <td colSpan={7} style={{ padding: "0.75rem 1rem 1rem", background: "var(--bg-elevated)" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem" }}>
+                      {[
+                        {
+                          label: "MONITORING",
+                          rows: [
+                            ["Check every", site.frequency ? `${site.frequency}s` : "60s"],
+                            ["Added", new Date().toLocaleDateString()],
+                            ["Last check", new Date().toLocaleTimeString()],
+                          ],
+                        },
+                        {
+                          label: "PERFORMANCE",
+                          rows: [
+                            ["Uptime", site.uptime || "—"],
+                            ["Avg response", site.response_time !== "N/A" ? `${parseFloat(site.response_time || 0).toFixed(0)}ms` : "—"],
+                            ["Status", site.isDown ? "Down" : "Up"],
+                          ],
+                        },
+                        {
+                          label: "ALERTS",
+                          rows: [
+                            ["Email", "Enabled"],
+                            ["SMS", "Disabled"],
+                            ["Slack", "—"],
+                          ],
+                        },
+                      ].map(({ label, rows }) => (
+                        <div key={label} style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.75rem" }}>
+                          <div style={{ fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "0.5rem" }}>{label}</div>
+                          {rows.map(([k, v]) => (
+                            <div key={k} style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{k}</span>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-primary)", fontFamily: "JetBrains Mono, monospace" }}>{v}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-};
-
-export default WebsitesTable;
+}

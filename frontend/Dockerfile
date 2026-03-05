@@ -1,33 +1,31 @@
-# Use Node.js official image (lighter variant for better performance)
+# ── Stage 1: Build React app ──────────────────────────────────────────────────
 FROM node:18-alpine AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json first (better caching)
-COPY package.json package-lock.json ./
+# Accept the backend API URL as a build argument (set this in Railway dashboard)
+ARG REACT_APP_API_BASE_URL=http://localhost:5000
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
 
-# Install dependencies
+# Install dependencies first (better layer caching)
+COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
 
-# Copy the rest of the frontend code
+# Copy source and build
 COPY . .
-
-# Build the React app
 RUN npm run build
 
-# Use a lightweight web server for serving static files
+# ── Stage 2: Serve with Nginx ─────────────────────────────────────────────────
 FROM nginx:alpine
 
-# Set working directory
-WORKDIR /usr/share/nginx/html
+# Install envsubst (comes with gettext) so we can substitute $PORT at runtime
+RUN apk add --no-cache gettext
 
-# Remove default nginx static files and replace with React build
-RUN rm -rf ./*
-COPY --from=build /app/build ./
+# Copy build output
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Expose port 80
-EXPOSE 80
+# Copy our custom nginx config template
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Railway injects $PORT at runtime; envsubst will replace it in the config
+CMD ["/bin/sh", "-c", "envsubst '$PORT' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]

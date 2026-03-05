@@ -1,0 +1,8 @@
+name = "watchly-frontend"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "./build"
+
+[vars]
+# Set REACT_APP_API_BASE_URL in the Cloudflare Pages dashboard under:
+# Settings → Environment Variables → Production
+# REACT_APP_API_BASE_URL = "https://your-backend.up.railway.app"

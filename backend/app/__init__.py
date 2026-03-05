@@ -41,7 +41,14 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "supersecretkey")
 
-    allowed_origins = os.getenv("FRONTEND_URL", "http://localhost:3000,https://6f4c26cc.prototipo-7t0.pages.dev/").split(",")
+    # FRONTEND_URL = comma-separated list of allowed origins
+    # Set this in Railway Variables tab to your Cloudflare Pages URL
+    # e.g. FRONTEND_URL=https://watchly.pages.dev,https://watchly.yourdomain.com
+    _frontend_env = os.getenv("FRONTEND_URL", "")
+    allowed_origins = [o.strip().rstrip("/") for o in _frontend_env.split(",") if o.strip()]
+    # Always allow local development
+    if "http://localhost:3000" not in allowed_origins:
+        allowed_origins.append("http://localhost:3000")
 
     CORS(app, resources={r"/*": {"origins": allowed_origins}},
             supports_credentials=True,

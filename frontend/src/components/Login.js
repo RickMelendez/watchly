@@ -1,7 +1,59 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Eye, Monitor } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Terminal, ArrowRight, Shield } from "lucide-react";
 import api from "../services/api";
+
+const TERMINAL_LINES = [
+  { delay: 0, text: "$ watchly status --all", color: "#22c55e" },
+  { delay: 600, text: "● 3 sites online  ·  99.97% uptime", color: "#a3e635" },
+  { delay: 1200, text: "● 0 incidents open  ·  0 failed", color: "#a3e635" },
+  { delay: 1800, text: "● Avg response time: 142ms", color: "#a3e635" },
+  { delay: 2400, text: "● All security checks passing", color: "#a3e635" },
+  { delay: 3000, text: "$ _", color: "#22c55e" },
+];
+
+function TerminalPreview() {
+  const [visibleLines, setVisibleLines] = useState([]);
+
+  React.useEffect(() => {
+    setVisibleLines([]);
+    const timeouts = TERMINAL_LINES.map((line) =>
+      setTimeout(() => {
+        setVisibleLines((prev) => [...prev, line]);
+      }, line.delay)
+    );
+    return () => timeouts.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div
+      style={{
+        background: "#0a0a0a",
+        border: "1px solid #1f1f1f",
+        borderRadius: 10,
+        overflow: "hidden",
+        fontFamily: "JetBrains Mono, monospace",
+        fontSize: "0.8rem",
+      }}
+    >
+      {/* Title bar */}
+      <div style={{ padding: "0.6rem 0.875rem", borderBottom: "1px solid #1f1f1f", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e" }} />
+        <span style={{ marginLeft: "0.5rem", color: "#4a4a4a", fontSize: "0.7rem" }}>watchly — infrastructure overview</span>
+      </div>
+      {/* Lines */}
+      <div style={{ padding: "1rem" }}>
+        {visibleLines.map((line, i) => (
+          <div key={i} style={{ color: line.color, marginBottom: "0.3rem", animation: "fadeIn 0.2s ease" }}>
+            {line.text}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Login({ onLogin }) {
   const [name, setName] = useState("");
@@ -10,176 +62,184 @@ export default function Login({ onLogin }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-  const [message, setMessage] = useState("");
-  const containerRef = useRef(null);
-  const navigate = useNavigate(); // Initialize useNavigate
-
-  useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      setMessage("Monitor your websites in real-time with instant alerts and performance tracking.");
-      i++;
-      if (i > 5) clearInterval(interval); // Limit interval for a smoother animation
-    }, 100);
-    return () => clearInterval(interval);
-  }, []);
-
-  const switchMode = () => {
-    if (containerRef.current) {
-      containerRef.current.classList.add("animate-fadeIn");
-      setIsSignUp(!isSignUp);
-      setTimeout(() => {
-        if (containerRef.current) {
-          containerRef.current.classList.remove("animate-fadeIn");
-        }
-      }, 600);
-    }
-  };
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
     try {
-      let response;
       if (isSignUp) {
-        // Send request to register API
-        response = await api.post("/auth/register", { name, email, password });
-
-        if (response.status === 201) {
-          console.log("Signup successful! Logging in...");
-          const loginResponse = await api.post("/auth/login", { email, password });
-          localStorage.setItem("token", loginResponse.data.access_token);
-          console.log("Token stored after signup:", loginResponse.data.access_token);
-          navigate("/dashboard"); // Redirect to dashboard
+        const res = await api.post("/auth/register", { name, email, password });
+        if (res.status === 201) {
+          const loginRes = await api.post("/auth/login", { email, password });
+          localStorage.setItem("token", loginRes.data.access_token);
+          if (onLogin) onLogin();
+          navigate("/dashboard");
           return;
         }
       } else {
-        // Send request to login API
-        response = await api.post("/auth/login", { email, password });
+        const res = await api.post("/auth/login", { email, password });
+        if (res.data.access_token) {
+          localStorage.setItem("token", res.data.access_token);
+          if (onLogin) onLogin();
+          navigate("/dashboard");
+          return;
+        }
       }
-
-      if (response.data.access_token) {
-        localStorage.setItem("token", response.data.access_token);
-        console.log("Token stored:", response.data.access_token);
-        navigate("/dashboard");
-      } else {
-        setError(isSignUp ? "Signup failed." : "Invalid email or password");
-      }
-    } catch (error) {
-      console.error("API Error:", error.response?.data || error.message);
+      setError(isSignUp ? "Signup failed." : "Invalid email or password.");
+    } catch (err) {
       setError(isSignUp ? "Signup failed. Try again." : "Login failed. Check your credentials.");
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-monitor-dark to-monitor-dark/90 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-monitor-DEFAULT/5 via-transparent to-transparent"></div>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--bg-base)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1.5rem",
+      }}
+    >
       <div
-        ref={containerRef}
-        className="w-full max-w-4xl bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden relative border border-white/10"
+        style={{
+          width: "100%",
+          maxWidth: 880,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          background: "var(--bg-surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 14,
+          overflow: "hidden",
+          boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
+        }}
       >
-        <div className="flex flex-col md:flex-row">
-          {/* Left Panel - Login/Register Form */}
-          <div className="w-full md:w-1/2 p-8 bg-gradient-to-br from-green-500 to-green-600">
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center mb-4">
-                <div className="relative">
-                  <Monitor className="w-16 h-16 text-white animate-pulse" />
-                  <Eye className="w-8 h-8 text-white absolute bottom-0 right-0 animate-float" />
-                </div>
-              </div>
-              <h1 className="text-2xl font-bold text-white">Watchly</h1>
-              <p className="text-sm text-white/80 mt-2">System Monitoring & Alerts</p>
+        {/* ── Left: Form ───────────────────────────── */}
+        <div style={{ padding: "2.5rem" }}>
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "2rem" }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                background: "rgba(34,197,94,0.12)",
+                border: "1px solid rgba(34,197,94,0.3)",
+                borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Terminal size={16} color="#22c55e" />
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="bg-red-500/10 text-red-400 p-3 rounded-lg text-sm text-center border border-red-500/20">
-                  {error}
-                </div>
-              )}
-
-              {/* Name input (only shown for signup mode) */}
-              {isSignUp && (
-                <div>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Full Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:ring-2 focus:ring-white focus:border-transparent outline-none transition-all duration-200"
-                    required={isSignUp}  // Require only when signing up
-                    autoComplete="name"
-                  />
-                </div>
-              )}
-
-              <div>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:ring-2 focus:ring-white focus:border-transparent outline-none transition-all duration-200"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-
-              <div>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:ring-2 focus:ring-white focus:border-transparent outline-none transition-all duration-200"
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full p-3 rounded-lg font-medium transition-all duration-200 ${
-                  isLoading
-                    ? "bg-gray-600 cursor-not-allowed"
-                    : "bg-white text-green-600 hover:bg-white/90"
-                }`}
-              >
-                {isLoading ? "Processing..." : isSignUp ? "Sign Up" : "Login"}
-              </button>
-
-              <button
-                type="button"
-                onClick={switchMode}
-                className="w-full p-3 rounded-lg font-medium text-white hover:underline transition-all duration-200"
-              >
-                {isSignUp ? "Already have an account? Login" : "Don't have an account? Sign Up"}
-              </button>
-            </form>
+            <span style={{ fontWeight: 700, fontSize: "1rem", color: "var(--text-primary)" }}>Watchly</span>
           </div>
 
-          {/* Right Panel - Info Panel */}
-          <div className="w-full md:w-1/2 bg-monitor-DEFAULT p-8 text-white flex flex-col justify-center items-center relative overflow-hidden">
-            <div className="relative z-10 text-center">
-              <h2 className="text-3xl font-bold mb-4 animate-fadeIn">
-                Start your journey with us
-              </h2>
-              <p className="mb-8 animate-fadeIn">
-                Keep your systems under control.
-              </p>
+          <h1 style={{ fontSize: "1.375rem", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 0.25rem" }}>
+            {isSignUp ? "Create account" : "Welcome back"}
+          </h1>
+          <p style={{ fontSize: "0.8125rem", color: "var(--text-secondary)", margin: "0 0 1.75rem" }}>
+            {isSignUp ? "Start monitoring your websites in minutes." : "Sign in to your monitoring dashboard."}
+          </p>
+
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {error && (
+              <div
+                style={{
+                  padding: "0.625rem 0.875rem",
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.2)",
+                  borderRadius: 6,
+                  fontSize: "0.8125rem",
+                  color: "#ef4444",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {isSignUp && (
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: "var(--text-secondary)", marginBottom: "0.375rem" }}>Full Name</label>
+                <input className="input-dark" type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required={isSignUp} autoComplete="name" />
+              </div>
+            )}
+
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: "var(--text-secondary)", marginBottom: "0.375rem" }}>Email</label>
+              <input className="input-dark" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-monitor-DEFAULT/20 to-monitor-dark/20"></div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: "var(--text-secondary)", marginBottom: "0.375rem" }}>Password</label>
+              <input className="input-dark" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete={isSignUp ? "new-password" : "current-password"} />
+            </div>
+
+            <button className="btn-accent" type="submit" disabled={isLoading} style={{ marginTop: "0.25rem", justifyContent: "center", padding: "0.625rem" }}>
+              {isLoading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
+              {!isLoading && <ArrowRight size={14} />}
+            </button>
+          </form>
+
+          <p style={{ marginTop: "1.25rem", fontSize: "0.8125rem", color: "var(--text-muted)", textAlign: "center" }}>
+            {isSignUp ? "Already have an account? " : "Don't have an account? "}
+            <button
+              onClick={() => { setIsSignUp((p) => !p); setError(""); }}
+              style={{ background: "none", border: "none", color: "#22c55e", fontWeight: 500, cursor: "pointer", fontSize: "0.8125rem", fontFamily: "inherit" }}
+            >
+              {isSignUp ? "Sign in" : "Sign up"}
+            </button>
+          </p>
+
+          <div style={{ marginTop: "1.5rem", padding: "0.75rem", background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 8, display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+            <Shield size={13} color="var(--text-muted)" style={{ flexShrink: 0, marginTop: 1 }} />
+            <p style={{ margin: 0, fontSize: "0.7rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
+              Your credentials are encrypted and never shared. JWT auth with secure token storage.
+            </p>
+          </div>
+        </div>
+
+        {/* ── Right: Terminal Preview ───────────────── */}
+        <div
+          style={{
+            background: "#0d0d0d",
+            borderLeft: "1px solid var(--border)",
+            padding: "2.5rem",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: "1.25rem",
+          }}
+        >
+          <div>
+            <h2 style={{ margin: "0 0 0.375rem", fontSize: "1.125rem", fontWeight: 700, color: "var(--text-primary)" }}>
+              Infrastructure Monitoring,{" "}
+              <span style={{ color: "#22c55e" }}>Reimagined</span>
+            </h2>
+            <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--text-secondary)", lineHeight: 1.6 }}>
+              Monitor uptime, track response times, and get instant alerts when something goes wrong.
+            </p>
+          </div>
+
+          <TerminalPreview />
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.625rem" }}>
+            {[
+              ["99.97%", "Avg uptime"],
+              ["142ms", "Avg response"],
+              ["< 30s", "Check interval"],
+              ["24/7", "Monitoring"],
+            ].map(([val, label]) => (
+              <div key={label} style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.12)", borderRadius: 7, padding: "0.625rem" }}>
+                <div style={{ fontFamily: "JetBrains Mono, monospace", fontWeight: 600, fontSize: "1rem", color: "#22c55e" }}>{val}</div>
+                <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "0.125rem" }}>{label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

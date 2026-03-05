@@ -11,7 +11,6 @@ const api = axios.create({
 // Token Interceptor to attach token to API requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  console.log("Attaching token to request", token);
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
@@ -27,8 +26,9 @@ api.interceptors.response.use(
     if (error.response) {
       console.error('API Error:', error.response.data);
       if (error.response.status === 401) {
-        localStorage.setItem("redirectAfterLogin", window.location.pathname);
-        window.location.href = "/login/"; // Redirect to login
+        // Token expired or invalid — clear it and redirect
+        localStorage.removeItem("token");
+        window.location.href = "/login";
       }
     } else if (error.request) {
       console.error('Network Error:', error.request);
