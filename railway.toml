@@ -1,25 +1,10 @@
-[services.backend]
-root = "backend"
-
-[services.backend.build]
+[build]
 builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
 dockerContextDir = "backend"
 
-[services.backend.deploy]
+[deploy]
 healthcheckPath = "/"
 healthcheckTimeout = 300
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 3
-
-[services.frontend]
-root = "frontend"
-
-[services.frontend.build]
-builder = "DOCKERFILE"
-dockerfilePath = "frontend/Dockerfile"
-dockerContextDir = "frontend"
-
-[services.frontend.deploy]
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
