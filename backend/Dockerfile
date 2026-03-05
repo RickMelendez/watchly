@@ -1,15 +1,7 @@
-# Use official Python image
-FROM python:3.11-slim
+# Use official Python image - standard version includes gcc and build tools
+FROM python:3.11
 
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    gcc \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # Copy requirements first for better layer caching
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
