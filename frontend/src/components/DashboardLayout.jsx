@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
     Globe,
@@ -51,7 +51,7 @@ export default function DashboardLayout({
 }) {
     const navigate = useNavigate();
     const location = useLocation();
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    // Sidebar state was extracted but not used internally
 
     const handleLogout = () => {
         localStorage.removeItem("token");

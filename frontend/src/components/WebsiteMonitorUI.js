@@ -16,9 +16,9 @@ export default function WebsiteMonitorUI() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeAlerts, setActiveAlerts] = useState(0);
-  const [notifications, setNotifications] = useState([]);
+  // notifications removed
   const [formError, setFormError] = useState("");
-  const [statusLoading, setStatusLoading] = useState(false);
+  // statusLoading removed
   const [refreshing, setRefreshing] = useState(false);
 
   const websitesRef = useRef(websites);
@@ -44,7 +44,7 @@ export default function WebsiteMonitorUI() {
   const fetchStatuses = useCallback(async () => {
     const current = websitesRef.current;
     if (current.length === 0) return;
-    setStatusLoading(true);
+    // statusLoading(true) removed
     setRefreshing(true);
     try {
       const updated = await Promise.all(
@@ -76,7 +76,7 @@ export default function WebsiteMonitorUI() {
       setAverageResponseTime(avgRt);
     } catch { }
     finally {
-      setStatusLoading(false);
+      // statusLoading(false) removed
       setRefreshing(false);
     }
   }, [setWebsites]);

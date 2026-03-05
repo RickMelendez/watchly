@@ -1,5 +1,5 @@
 import React from "react";
-import { Activity, Globe, Server, AlertTriangle, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { Server, AlertTriangle, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -78,7 +78,7 @@ const DashboardHome = () => {
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                                 <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} />
-                                <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `${val / 1000}k`} />
+                                <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `${val / 1000} k`} />
                                 <RechartsTooltip
                                     contentStyle={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', borderRadius: 8, fontSize: '0.8rem' }}
                                     itemStyle={{ color: 'var(--text-primary)' }}
@@ -106,7 +106,7 @@ const DashboardHome = () => {
                                     stroke="none"
                                 >
                                     {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
                                 <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border)', borderRadius: 8, fontSize: '0.8rem' }} />

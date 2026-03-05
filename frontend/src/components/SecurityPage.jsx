@@ -1,6 +1,6 @@
 import React from "react";
 import DashboardLayout from "./DashboardLayout";
-import { Shield, Lock, FileText, CheckCircle2 } from "lucide-react";
+import { Shield, FileText, CheckCircle2 } from "lucide-react";
 
 const SecurityPage = () => {
     return (

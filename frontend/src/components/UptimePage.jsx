@@ -50,6 +50,7 @@ const UptimePage = () => {
 
     useEffect(() => {
         enrichData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [websites]);
 
     const overallUptime = enrichedSites.length
