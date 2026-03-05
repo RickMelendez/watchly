@@ -1,4 +1,6 @@
 import os
+import re
+from urllib.parse import urlparse
 from flask import Flask, jsonify
 from sqlalchemy.pool import NullPool
 from flask_sqlalchemy import SQLAlchemy
@@ -50,11 +52,23 @@ def create_app():
     # e.g. FRONTEND_URL=https://watchly.pages.dev,https://watchly.yourdomain.com
     _frontend_env = os.getenv("FRONTEND_URL", "")
     allowed_origins = [o.strip().rstrip("/") for o in _frontend_env.split(",") if o.strip()]
-    # Always allow local development
-    if "http://localhost:3000" not in allowed_origins:
-        allowed_origins.append("http://localhost:3000")
 
-    CORS(app, resources={r"/*": {"origins": allowed_origins}},
+    # Always allow local development
+    for local_origin in ("http://localhost:3000", "http://127.0.0.1:3000"):
+        if local_origin not in allowed_origins:
+            allowed_origins.append(local_origin)
+
+    # If a Cloudflare Pages production domain is provided, also allow preview
+    # deployment subdomains like https://<hash>.<project>.pages.dev.
+    cors_origins = list(allowed_origins)
+    for origin in allowed_origins:
+        host = urlparse(origin).hostname or ""
+        if host.endswith(".pages.dev"):
+            cors_origins.append(rf"^https://[a-z0-9-]+\.{re.escape(host)}$")
+
+    cors_origins = list(dict.fromkeys(cors_origins))
+
+    CORS(app, resources={r"/*": {"origins": cors_origins}},
             supports_credentials=True,
             expose_headers=["Content-Type", "Authorization"],
             allow_headers=["Content-Type", "Authorization"],
