@@ -14,12 +14,10 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_DEV_API_KEY")
 FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL")
 
 if not SENDGRID_API_KEY:
-    logger.error("❌ ERROR: SendGrid API Key not found! Check .env file.")
-    exit(1)
+    logger.warning("⚠️ WARNING: SendGrid API Key not found! Email sending will be disabled.")
 
 if not FROM_EMAIL:
-    logger.error("❌ ERROR: FROM_EMAIL is missing! Make sure it's a verified sender in SendGrid.")
-    exit(1)
+    logger.warning("⚠️ WARNING: FROM_EMAIL is missing! Email sending will be disabled.")
 
 async def send_email_via_cloudflare(to_email, subject, message):
     """
