@@ -79,6 +79,10 @@ def create_app():
     api.add_namespace(auth_ns, path="/auth")
     api.add_namespace(status_ns, path="/status")
 
+    @app.route("/", methods=['GET'])
+    def root():
+        return jsonify({"message": "Watchly API is running! Health check passed."}), 200
+
     @app.route("/status", methods=['GET'])
     def status():
         return jsonify({"message": "Server is running"}), 200

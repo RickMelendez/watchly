@@ -13,5 +13,5 @@ COPY backend/ .
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:${PORT:-5000}/ || exit 1
 
-# Run DB migrations then start Gunicorn
-CMD flask db upgrade && gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} main:app --log-level=info --timeout 120
+# Run Gunicorn
+CMD gunicorn -w 4 -b 0.0.0.0:${PORT:-5000} main:app --log-level=info --timeout 120

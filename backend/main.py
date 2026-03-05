@@ -13,15 +13,7 @@ app = create_app()
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
-@app.route("/", methods=["GET", "POST"])
-def home():
-    if request.method == "GET":
-        return jsonify({"message": "Watchly API is running!"}), 200
-    elif request.method == "POST":
-        data = request.get_json()
-        return jsonify({"received": data}), 200
-
-
+# Route moved to app/__init__.py
 def initialize_app():
     """
     Common setup code that should run once on startup, both locally and in production.
