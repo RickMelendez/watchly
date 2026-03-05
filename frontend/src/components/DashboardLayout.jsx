@@ -13,6 +13,8 @@ import {
     Server,
     Rocket,
     AlertTriangle,
+    FileText,
+    GitBranch
 } from "lucide-react";
 
 const NAV = [
@@ -35,8 +37,10 @@ const NAV = [
         group: "OPERATIONS",
         items: [
             { label: "Deployments", icon: Rocket, path: "/dashboard/deployments" },
+            { label: "Pipelines", icon: GitBranch, path: "/dashboard/pipelines" },
             { label: "Incidents", icon: AlertTriangle, path: "/dashboard/incidents" },
-            { label: "API Monitoring", icon: Activity, path: "/dashboard/analytics" },
+            { label: "Logs", icon: FileText, path: "/dashboard/logs" },
+            { label: "API Monitoring", icon: Activity, path: "/dashboard/api-monitoring" },
             { label: "Security", icon: Settings, path: "/dashboard/security" },
         ],
     },

@@ -12,7 +12,11 @@ import Login from "./components/Login";
 import WebsiteMonitorUI from "./components/WebsiteMonitorUI";
 import AlertsPage from "./components/AlertsPage";
 import UptimePage from "./components/UptimePage";
+import ApiMonitoringPage from "./components/ApiMonitoringPage";
 import AnalyticsPage from "./components/AnalyticsPage";
+import PipelinesPage from "./components/PipelinesPage";
+import LogsPage from "./components/LogsPage";
+import ContainersPage from "./components/ContainersPage";
 import DeploymentsPage from "./components/DeploymentsPage";
 import DashboardHome from "./components/DashboardHome";
 import SecurityPage from "./components/SecurityPage";
@@ -71,6 +75,22 @@ function AppRoutes() {
       <Route
         path="/dashboard/analytics"
         element={user ? <AnalyticsPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/dashboard/pipelines"
+        element={user ? <PipelinesPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/dashboard/logs"
+        element={user ? <LogsPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/dashboard/containers"
+        element={user ? <ContainersPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/dashboard/api-monitoring"
+        element={user ? <ApiMonitoringPage /> : <Navigate to="/login" replace />}
       />
       <Route
         path="/dashboard/deployments"
