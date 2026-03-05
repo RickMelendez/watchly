@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Activity, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import useWebsites from "../hooks/useWebsites";
@@ -9,7 +9,7 @@ const UptimePage = () => {
     const [enrichedSites, setEnrichedSites] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const enrichData = async () => {
+    const enrichData = useCallback(async () => {
         if (!websites.length) {
             setLoading(false);
             return;
@@ -46,12 +46,11 @@ const UptimePage = () => {
         );
         setEnrichedSites(data);
         setLoading(false);
-    };
+    }, [websites]);
 
     useEffect(() => {
         enrichData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [websites]);
+    }, [enrichData]);
 
     const overallUptime = enrichedSites.length
         ? (enrichedSites.reduce((sum, s) => sum + parseFloat(s.uptimePercent), 0) / enrichedSites.length).toFixed(2)
