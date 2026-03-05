@@ -37,7 +37,11 @@ api = Api(
 #Create App
 def create_app():
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///watchly.db")
+    database_url = os.getenv("DATABASE_URL", "sqlite:///watchly.db")
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "supersecretkey")
 
@@ -86,6 +90,10 @@ def create_app():
     @app.route("/status", methods=['GET'])
     def status():
         return jsonify({"message": "Server is running"}), 200
+
+    @app.route("/healthz", methods=["GET"])
+    def healthz():
+        return jsonify({"ok": True}), 200
 
     for rule in app.url_map.iter_rules():
         print(f"{rule.endpoint}: {rule.rule}")
