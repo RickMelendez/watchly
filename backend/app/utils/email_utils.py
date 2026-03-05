@@ -10,7 +10,7 @@ from app.utils.logger import logger  # Ensure logger is imported
 load_dotenv()
 
 CLOUDFLARE_WORKER_URL = "https://watchly-worker.joel-caban2017.workers.dev"
-SENDGRID_API_KEY = os.getenv("SENDGRID_DEV_API_KEY")
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY") or os.getenv("SENDGRID_DEV_API_KEY")
 FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL")
 
 if not SENDGRID_API_KEY:

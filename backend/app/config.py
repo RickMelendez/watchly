@@ -17,5 +17,5 @@ if DATABASE_URL.startswith("postgres://"):
 class Config:
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # Prevents unnecessary overhead
-    SENDGRID_API_KEY = os.getenv("SENDGRID_DEV_API_KEY")
+    SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY") or os.getenv("SENDGRID_DEV_API_KEY")
     FLASK_DEBUG = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1")
