@@ -91,6 +91,7 @@ def create_app():
     from app.routes.auth import auth_ns
     from app.routes.status import status_ns
     from app.routes.dashboard import dashboard_ns
+    from app.routes.analytics import analytics_ns
 
     api.add_namespace(alerts_ns, path="/alerts")  # Register namespaces
     api.add_namespace(websites_ns, path="/websites")
@@ -98,6 +99,7 @@ def create_app():
     api.add_namespace(auth_ns, path="/auth")
     api.add_namespace(status_ns, path="/status")
     api.add_namespace(dashboard_ns, path="/dashboard")
+    api.add_namespace(analytics_ns, path="/analytics")
 
     @app.route("/", methods=['GET'])
     def index_route():

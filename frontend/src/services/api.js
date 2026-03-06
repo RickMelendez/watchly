@@ -72,6 +72,9 @@ export const updateAlert = (alertId, status) => api.patch(`/alerts/${alertId}`, 
 // Dashboard
 export const getDashboardSummary = () => api.get("/dashboard/summary");
 
+// Analytics
+export const getAnalyticsSummary = () => api.get("/analytics/summary");
+
 // Fetch Website Metrics (Uptime & Response Time)
 export const fetchWebsiteMetrics = async (websiteId) => {
   try {

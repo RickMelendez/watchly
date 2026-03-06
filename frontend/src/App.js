@@ -20,6 +20,7 @@ import ContainersPage from "./components/ContainersPage";
 import DeploymentsPage from "./components/DeploymentsPage";
 import DashboardHome from "./components/DashboardHome";
 import SecurityPage from "./components/SecurityPage";
+import IncidentsPage from "./components/IncidentsPage";
 import NotFound from "./components/Common/NotFound";
 import Docs from "./pages/Docs";
 import "./index.css";
@@ -99,6 +100,10 @@ function AppRoutes() {
       <Route
         path="/dashboard/security"
         element={user ? <SecurityPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/dashboard/incidents"
+        element={user ? <IncidentsPage /> : <Navigate to="/login" replace />}
       />
       <Route
         path="/dashboard/settings"
