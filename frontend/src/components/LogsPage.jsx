@@ -1,160 +1,196 @@
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Search, RefreshCw, Plus, Trash2, X } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
+import { getLogs, addLog, clearLogs } from "../services/api";
 
-const LogsPage = () => {
-    // Mock data based on the Signal Dashboard screenshot
-    const allLogs = [
-        { timestamp: "2026-02-27 14:25:12.348", level: "INFO", service: "api-gateway", message: "GET /api/v2/users 200 OK - 45ms" },
-        { timestamp: "2026-02-27 14:25:11.892", level: "ERROR", service: "auth-service", message: "Connection pool exhausted, waiting for available connection" },
-        { timestamp: "2026-02-27 14:25:11.445", level: "WARN", service: "payment-service", message: "Rate limit exceeded for IP 203.0.113.42 (429)" },
-        { timestamp: "2026-02-27 14:25:10.998", level: "INFO", service: "api-gateway", message: "POST /api/v2/orders 201 Created - 128ms" },
-        { timestamp: "2026-02-27 14:25:10.221", level: "DEBUG", service: "worker-queue", message: "Processing job batch #4821 - 12 items queued" },
-        { timestamp: "2026-02-27 14:25:09.876", level: "INFO", service: "web-frontend", message: "TLS handshake completed with upstream proxy" },
-        { timestamp: "2026-02-27 14:25:09.334", level: "ERROR", service: "postgres-primary", message: "FATAL: remaining connection slots reserved for superuser" },
-        { timestamp: "2026-02-27 14:25:08.712", level: "INFO", service: "redis-cache", message: "Cache miss for key: session:usr_a8f2c4 - fetching from source" },
-        { timestamp: "2026-02-27 14:25:08.198", level: "WARN", service: "metrics-agent", message: "Scrape target prod-worker-01:9100 unreachable - timeout after 5s" },
-        { timestamp: "2026-02-27 14:25:07.645", level: "INFO", service: "api-gateway", message: "GET /api/v2/products?category=electronics 200 OK - 67ms" },
-        { timestamp: "2026-02-27 14:25:07.182", level: "INFO", service: "auth-service", message: "JWT token refreshed for user usr_7d92f1 - expires in 3600s" },
-        { timestamp: "2026-02-27 14:25:06.558", level: "DEBUG", service: "log-collector", message: "Flushing buffer - 2,847 events written to storage" },
-        { timestamp: "2026-02-27 14:25:06.014", level: "ERROR", service: "payment-service", message: "Stripe webhook signature verification failed - event evt_1xbc2dt" },
-        { timestamp: "2026-02-27 14:25:05.471", level: "INFO", service: "api-gateway", message: "DELETE /api/v2/sessions/sess_x9k2 204 No Content - 12ms" },
-        { timestamp: "2026-02-27 14:25:04.927", level: "WARN", service: "worker-queue", message: "Job retry #3 for email:send - previous attempt failed with ECONNRESET" },
-        { timestamp: "2026-02-27 14:25:04.303", level: "INFO", service: "search-service", message: "Elasticsearch index rebuilt - 142,847 documents indexed in 4.2s" },
-        { timestamp: "2026-02-27 14:25:03.839", level: "INFO", service: "api-gateway", message: "PATCH /api/v2/users/usr_3fb8 200 OK - 34ms" },
-        { timestamp: "2026-02-27 14:25:03.295", level: "DEBUG", service: "postgres-replica", message: "Replication lag: 0.3s - within acceptable threshold" },
-        { timestamp: "2026-02-27 14:25:02.751", level: "ERROR", service: "notification-svc", message: "FCM push notification delivery failed - InvalidRegistration for device tok_9x2m" },
-    ];
+const LEVELS = ["ALL", "DEBUG", "INFO", "WARN", "ERROR"];
 
+const levelStyle = (level) => {
+    switch (level) {
+        case "ERROR": return { bg: "rgba(239,68,68,0.15)",  color: "#EF4444" };
+        case "WARN":  return { bg: "rgba(245,158,11,0.15)", color: "#F59E0B" };
+        case "INFO":  return { bg: "rgba(16,185,129,0.15)", color: "#10B981" };
+        case "DEBUG": return { bg: "var(--bg-elevated)",    color: "var(--text-muted)" };
+        default:      return { bg: "var(--bg-elevated)",    color: "var(--text-secondary)" };
+    }
+};
+
+const msgColor = (level) => {
+    switch (level) {
+        case "ERROR": return "#EF4444";
+        case "WARN":  return "#FCD34D";
+        case "DEBUG": return "var(--text-muted)";
+        default:      return "var(--text-secondary)";
+    }
+};
+
+const EMPTY_FORM = { level: "INFO", service: "", message: "" };
+
+export default function LogsPage() {
+    const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("ALL");
-    const [searchQuery, setSearchQuery] = useState("");
+    const [search, setSearch] = useState("") ;
+    const [showForm, setShowForm] = useState(false);
+    const [form, setForm] = useState(EMPTY_FORM);
+    const [saving, setSaving] = useState(false);
+    const [clearing, setClearing] = useState(false);
 
-    const tabs = ["ALL", "DEBUG", "INFO", "WARN", "ERROR"];
-
-    const getLevelStyle = (level) => {
-        switch (level) {
-            case "INFO": return { bg: "rgba(16,185,129,0.15)", color: "#10B981" };
-            case "ERROR": return { bg: "rgba(239,68,68,0.15)", color: "#EF4444" };
-            case "WARN": return { bg: "rgba(245,158,11,0.15)", color: "#F59E0B" };
-            case "DEBUG": return { bg: "var(--bg-elevated)", color: "var(--text-secondary)" };
-            default: return { bg: "var(--bg-elevated)", color: "var(--text-secondary)" };
+    const load = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await getLogs(activeTab, search);
+            setLogs(res.data || []);
+        } catch {
+            setLogs([]);
+        } finally {
+            setLoading(false);
         }
+    }, [activeTab, search]);
+
+    useEffect(() => { load(); }, [load]);
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        if (!form.message) return;
+        setSaving(true);
+        try {
+            const res = await addLog({ level: form.level, service: form.service || "app", message: form.message });
+            setLogs(prev => [res.data, ...prev]);
+            setForm(EMPTY_FORM);
+            setShowForm(false);
+        } catch { }
+        finally { setSaving(false); }
     };
 
-    const filteredLogs = allLogs.filter(log => {
-        const matchesLevel = activeTab === "ALL" || log.level === activeTab;
-        const matchesSearch = log.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            log.service.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesLevel && matchesSearch;
-    });
+    const handleClear = async () => {
+        if (!window.confirm("Clear all logs? This cannot be undone.")) return;
+        setClearing(true);
+        try {
+            await clearLogs();
+            setLogs([]);
+        } catch { }
+        finally { setClearing(false); }
+    };
 
     return (
-        <DashboardLayout pageTitle="Log Explorer">
+        <DashboardLayout pageTitle="Log Explorer" onRefresh={load}>
             <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", margin: "0 0 1.5rem 0" }}>
                 Search and filter logs across all services
             </p>
 
             <div className="surface" style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
                 {/* Toolbar */}
-                <div style={{ padding: "1rem", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "1rem" }}>
+                <div style={{ padding: "1rem", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
                     {/* Search */}
-                    <div style={{ flex: 1, position: "relative" }}>
-                        <Search size={16} color="var(--text-muted)" style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)" }} />
+                    <div style={{ flex: 1, minWidth: 200, position: "relative" }}>
+                        <Search size={16} color="var(--text-muted)" style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                         <input
                             type="text"
                             placeholder="Search logs..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{
-                                width: "100%",
-                                background: "var(--bg-elevated)",
-                                border: "1px solid var(--border)",
-                                borderRadius: "8px",
-                                padding: "0.625rem 1rem 0.625rem 2.5rem",
-                                color: "var(--text-primary)",
-                                fontSize: "0.875rem",
-                                outline: "none"
-                            }}
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            style={{ width: "100%", background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.625rem 1rem 0.625rem 2.5rem", color: "var(--text-primary)", fontSize: "0.875rem", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }}
                         />
                     </div>
 
-                    {/* Level Tabs */}
-                    <div style={{ display: "flex", background: "var(--bg-elevated)", padding: "0.25rem", borderRadius: "8px", border: "1px solid var(--border)" }}>
-                        {tabs.map(tab => (
+                    {/* Level tabs */}
+                    <div style={{ display: "flex", background: "var(--bg-elevated)", padding: "0.25rem", borderRadius: 8, border: "1px solid var(--border)" }}>
+                        {LEVELS.map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                style={{
-                                    padding: "0.4rem 0.75rem",
-                                    borderRadius: "6px",
-                                    fontSize: "0.75rem",
-                                    fontWeight: 600,
-                                    color: activeTab === tab ? "var(--text-primary)" : "var(--text-muted)",
-                                    background: activeTab === tab ? "var(--border)" : "transparent",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    transition: "all 0.2s ease"
-                                }}
+                                style={{ padding: "0.4rem 0.75rem", borderRadius: 6, fontSize: "0.75rem", fontWeight: 600, color: activeTab === tab ? "var(--text-primary)" : "var(--text-muted)", background: activeTab === tab ? "var(--border)" : "transparent", border: "none", cursor: "pointer", fontFamily: "inherit" }}
                             >
                                 {tab}
                             </button>
                         ))}
                     </div>
+
+                    {/* Actions */}
+                    <button className="btn-ghost" onClick={load} disabled={loading} style={{ padding: "0.45rem 0.75rem" }}>
+                        <RefreshCw size={13} style={{ animation: loading ? "spin 0.8s linear infinite" : "none" }} />
+                        Refresh
+                    </button>
+                    <button
+                        onClick={() => setShowForm(v => !v)}
+                        style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.45rem 0.875rem", borderRadius: 6, border: "1px solid rgba(34,197,94,0.3)", background: "rgba(34,197,94,0.1)", color: "#22c55e", fontSize: "0.8125rem", fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}
+                    >
+                        {showForm ? <X size={13} /> : <Plus size={13} />}
+                        {showForm ? "Cancel" : "Add Log"}
+                    </button>
+                    <button className="btn-ghost" onClick={handleClear} disabled={clearing} style={{ padding: "0.45rem 0.75rem", color: "#ef4444", borderColor: "rgba(239,68,68,0.2)" }}>
+                        <Trash2 size={13} />
+                        Clear
+                    </button>
                 </div>
 
-                {/* Log List */}
-                <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem 0" }}>
-                    {filteredLogs.length > 0 ? (
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                            {filteredLogs.map((log, i) => {
-                                const levelStyle = getLevelStyle(log.level);
-                                // Make the text color slightly tinted based on the error level for the message
-                                const messageColor = log.level === 'ERROR' ? '#EF4444' : log.level === 'WARN' ? '#FCD34D' : log.level === 'DEBUG' ? 'var(--text-muted)' : 'var(--text-secondary)';
+                {/* Add form */}
+                {showForm && (
+                    <div style={{ padding: "0.875rem 1rem", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)" }}>
+                        <form onSubmit={handleAdd} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end", flexWrap: "wrap" }}>
+                            <div>
+                                <label style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block", marginBottom: "0.25rem" }}>Level</label>
+                                <select className="input" style={{ width: 90 }} value={form.level} onChange={e => setForm(p => ({ ...p, level: e.target.value }))}>
+                                    {["DEBUG","INFO","WARN","ERROR"].map(l => <option key={l} value={l}>{l}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block", marginBottom: "0.25rem" }}>Service</label>
+                                <input className="input" style={{ width: 140 }} value={form.service} onChange={e => setForm(p => ({ ...p, service: e.target.value }))} placeholder="api-gateway" />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 240 }}>
+                                <label style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block", marginBottom: "0.25rem" }}>Message *</label>
+                                <input className="input" value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} placeholder="Log message..." required />
+                            </div>
+                            <button type="submit" disabled={saving} style={{ padding: "0.5rem 1rem", borderRadius: 6, border: "none", background: "#22c55e", color: "#000", fontWeight: 600, cursor: "pointer", fontSize: "0.8125rem", fontFamily: "inherit", whiteSpace: "nowrap" }}>
+                                {saving ? "Adding..." : "Add"}
+                            </button>
+                        </form>
+                    </div>
+                )}
 
+                {/* Log list */}
+                <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem 0" }}>
+                    {loading ? (
+                        <div style={{ padding: "3rem", textAlign: "center" }}>
+                            <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 0.75rem" }} />
+                            <p style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>Loading logs...</p>
+                        </div>
+                    ) : logs.length === 0 ? (
+                        <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.875rem" }}>
+                            No logs found. Add one above or adjust filters.
+                        </div>
+                    ) : (
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            {logs.map((log, i) => {
+                                const ls = levelStyle(log.level);
                                 return (
                                     <div
-                                        key={i}
-                                        style={{
-                                            padding: "0.625rem 1.5rem",
-                                            display: "flex",
-                                            alignItems: "flex-start",
-                                            gap: "1rem",
-                                            borderBottom: "1px solid rgba(255,255,255,0.02)",
-                                            background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)",
-                                            fontFamily: "JetBrains Mono, monospace"
-                                        }}
+                                        key={log.id}
+                                        style={{ padding: "0.625rem 1.5rem", display: "flex", alignItems: "flex-start", gap: "1rem", borderBottom: "1px solid rgba(255,255,255,0.02)", background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)", fontFamily: "JetBrains Mono, monospace" }}
                                     >
                                         <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0, paddingTop: "0.1rem" }}>
-                                            {log.timestamp}
+                                            {log.timestamp ? new Date(log.timestamp).toISOString().replace("T", " ").slice(0, 23) : "—"}
                                         </div>
-                                        <div style={{ width: "60px", flexShrink: 0 }}>
-                                            <span style={{
-                                                fontSize: "0.625rem", fontWeight: 700, padding: "0.15rem 0.4rem", borderRadius: "4px",
-                                                background: levelStyle.bg, color: levelStyle.color,
-                                                display: "inline-block", textAlign: "center", width: "100%"
-                                            }}>
+                                        <div style={{ width: 60, flexShrink: 0 }}>
+                                            <span style={{ fontSize: "0.625rem", fontWeight: 700, padding: "0.15rem 0.4rem", borderRadius: 4, background: ls.bg, color: ls.color, display: "inline-block", textAlign: "center", width: "100%" }}>
                                                 {log.level}
                                             </span>
                                         </div>
                                         <div style={{ fontSize: "0.8125rem", color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0, paddingTop: "0.1rem" }}>
                                             [{log.service}]
                                         </div>
-                                        <div style={{ fontSize: "0.8125rem", color: messageColor, wordBreak: "break-all", lineHeight: 1.5 }}>
+                                        <div style={{ fontSize: "0.8125rem", color: msgColor(log.level), wordBreak: "break-all", lineHeight: 1.5, flex: 1 }}>
                                             {log.message}
                                         </div>
                                     </div>
-                                )
+                                );
                             })}
-                        </div>
-                    ) : (
-                        <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.875rem" }}>
-                            No logs found matching your filters.
                         </div>
                     )}
                 </div>
             </div>
         </DashboardLayout>
     );
-};
-
-export default LogsPage;
+}

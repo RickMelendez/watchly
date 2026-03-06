@@ -81,7 +81,7 @@ def create_app():
 
     # Initialize SessionLocal AFTER app & db are set up
     with app.app_context():
-        from app.models import User, Website, Metric, Alert, Container, Deployment, Pipeline  # ✅ Ensure models are registered
+        from app.models import User, Website, Metric, Alert, Container, Deployment, Pipeline, Log, SecurityFinding  # ✅ Ensure models are registered
         global SessionLocal
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db.engine)  # ✅ Fix: Initialize inside app context
 
@@ -95,6 +95,9 @@ def create_app():
     from app.routes.containers import containers_ns
     from app.routes.deployments import deployments_ns
     from app.routes.pipelines import pipelines_ns
+    from app.routes.logs import logs_ns
+    from app.routes.api_monitoring import api_monitoring_ns
+    from app.routes.security import security_ns
 
     api.add_namespace(alerts_ns, path="/alerts")  # Register namespaces
     api.add_namespace(websites_ns, path="/websites")
@@ -106,6 +109,9 @@ def create_app():
     api.add_namespace(containers_ns, path="/containers")
     api.add_namespace(deployments_ns, path="/deployments")
     api.add_namespace(pipelines_ns, path="/pipelines")
+    api.add_namespace(logs_ns, path="/logs")
+    api.add_namespace(api_monitoring_ns, path="/api-monitoring")
+    api.add_namespace(security_ns, path="/security")
 
     @app.route("/", methods=['GET'])
     def index_route():

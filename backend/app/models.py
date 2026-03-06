@@ -98,6 +98,29 @@ class Deployment(db.Model):
     deployed_by = db.Column(db.String(100), default="")
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+#Log Model
+class Log(db.Model):
+    __tablename__ = 'log'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False, index=True)
+    level = db.Column(db.String(10), nullable=False, default="INFO")   # DEBUG, INFO, WARN, ERROR
+    service = db.Column(db.String(100), nullable=False, default="app")
+    message = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+#SecurityFinding Model
+class SecurityFinding(db.Model):
+    __tablename__ = 'security_finding'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False, index=True)
+    severity = db.Column(db.String(20), nullable=False, default="medium")  # critical, high, medium, low
+    vulnerability = db.Column(db.String(300), nullable=False)
+    resource = db.Column(db.String(200), nullable=False, default="")
+    status = db.Column(db.String(50), default="open")   # open, in_progress, resolved
+    detected_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
 #Pipeline Model
 class Pipeline(db.Model):
     __tablename__ = 'pipeline'

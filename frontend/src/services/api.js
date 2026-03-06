@@ -94,6 +94,27 @@ export const getPipelineSummary = () => api.get("/pipelines/summary");
 export const addPipeline = (data) => api.post("/pipelines/", data);
 export const deletePipeline = (id) => api.delete(`/pipelines/${id}`);
 
+// Logs
+export const getLogs = (level, search) => {
+    const params = new URLSearchParams();
+    if (level && level !== 'ALL') params.append('level', level);
+    if (search) params.append('search', search);
+    return api.get(`/logs/?${params.toString()}`);
+};
+export const addLog = (data) => api.post("/logs/", data);
+export const deleteLog = (id) => api.delete(`/logs/${id}`);
+export const clearLogs = () => api.delete("/logs/clear");
+
+// API Monitoring
+export const getApiMonitoringSummary = () => api.get("/api-monitoring/summary");
+
+// Security
+export const getSecurityFindings = () => api.get("/security/");
+export const getSecuritySummary = () => api.get("/security/summary");
+export const addSecurityFinding = (data) => api.post("/security/", data);
+export const updateSecurityFinding = (id, data) => api.patch(`/security/${id}`, data);
+export const deleteSecurityFinding = (id) => api.delete(`/security/${id}`);
+
 // Fetch Website Metrics (Uptime & Response Time)
 export const fetchWebsiteMetrics = async (websiteId) => {
   try {
