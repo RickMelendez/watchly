@@ -121,6 +121,23 @@ class SecurityFinding(db.Model):
     status = db.Column(db.String(50), default="open")   # open, in_progress, resolved
     detected_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+#OtelSpan Model — stores OpenTelemetry HTTP spans captured by the Flask instrumentation
+class OtelSpan(db.Model):
+    __tablename__ = 'otel_span'
+
+    id               = db.Column(db.String(32),  primary_key=True)          # 16-char hex span_id
+    trace_id         = db.Column(db.String(32),  nullable=False, index=True)
+    parent_span_id   = db.Column(db.String(32),  nullable=True)
+    name             = db.Column(db.String(200), nullable=False)
+    start_time       = db.Column(db.DateTime,    nullable=False, index=True)
+    duration_ms      = db.Column(db.Float,       nullable=False)
+    status_code      = db.Column(db.String(10),  default="OK")    # OK | ERROR
+    http_method      = db.Column(db.String(10),  nullable=True)
+    http_route       = db.Column(db.String(200), nullable=True, index=True)
+    http_status_code = db.Column(db.Integer,     nullable=True)
+    error_message    = db.Column(db.Text,        nullable=True)
+
+
 #Pipeline Model
 class Pipeline(db.Model):
     __tablename__ = 'pipeline'

@@ -115,6 +115,10 @@ export const addSecurityFinding = (data) => api.post("/security/", data);
 export const updateSecurityFinding = (id, data) => api.patch(`/security/${id}`, data);
 export const deleteSecurityFinding = (id) => api.delete(`/security/${id}`);
 
+// Telemetry (OpenTelemetry APM)
+export const getTelemetryRoutes = () => api.get("/telemetry/routes");
+export const getTelemetryTraces = (limit = 50) => api.get(`/telemetry/traces?limit=${limit}`);
+
 // Fetch Website Metrics (Uptime & Response Time)
 export const fetchWebsiteMetrics = async (websiteId) => {
   try {

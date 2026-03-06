@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Zap, AlertTriangle, Clock, Globe, RefreshCw } from "lucide-react";
+import { Zap, AlertTriangle, Clock, Globe, RefreshCw, Activity } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
-import { getApiMonitoringSummary } from "../services/api";
+import { getApiMonitoringSummary, getTelemetryRoutes, getTelemetryTraces } from "../services/api";
 
 const statusStyle = (s) => {
     switch (s) {
@@ -14,15 +14,44 @@ const statusStyle = (s) => {
 
 const fmtMs = (v) => v > 0 ? `${v}ms` : "—";
 
+const timeAgo = (ts) => {
+    if (!ts) return "—";
+    const normalized = typeof ts === "string" && !ts.endsWith("Z") && !ts.includes("+") ? ts + "Z" : ts;
+    const diff = Math.floor((Date.now() - new Date(normalized)) / 1000);
+    if (diff < 0) return "just now";
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+};
+
+const methodColor = (m) => {
+    switch ((m || "").toUpperCase()) {
+        case "GET":    return "#10B981";
+        case "POST":   return "#3B82F6";
+        case "PATCH":  return "#F59E0B";
+        case "DELETE": return "#EF4444";
+        default:       return "var(--text-muted)";
+    }
+};
+
 export default function ApiMonitoringPage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [routeStats, setRouteStats] = useState([]);
+    const [traces, setTraces] = useState([]);
 
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getApiMonitoringSummary();
-            setData(res.data);
+            const [monRes, routesRes, tracesRes] = await Promise.allSettled([
+                getApiMonitoringSummary(),
+                getTelemetryRoutes(),
+                getTelemetryTraces(50),
+            ]);
+            if (monRes.status === "fulfilled") setData(monRes.value.data);
+            if (routesRes.status === "fulfilled") setRouteStats(routesRes.value.data || []);
+            if (tracesRes.status === "fulfilled") setTraces(tracesRes.value.data || []);
         } catch {
             setData(null);
         } finally {
@@ -157,6 +186,108 @@ export default function ApiMonitoringPage() {
                             </table>
                         </div>
                     </div>
+                </>
+            )}
+            {/* ── OpenTelemetry APM ── */}
+            <div style={{ marginTop: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+                <Activity size={16} color="#10B981" />
+                <span style={{ fontSize: "0.9375rem", fontWeight: 600 }}>Live APM</span>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginLeft: "0.25rem" }}>powered by OpenTelemetry</span>
+            </div>
+
+            {routeStats.length === 0 && traces.length === 0 ? (
+                <div className="surface" style={{ padding: "2.5rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
+                    No trace data yet. Traces will appear here automatically as API requests are made.
+                </div>
+            ) : (
+                <>
+                    {/* Route Performance Table */}
+                    {routeStats.length > 0 && (
+                        <div className="surface" style={{ overflow: "hidden", marginBottom: "1.5rem" }}>
+                            <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid var(--border)" }}>
+                                <h3 style={{ margin: 0, fontSize: "0.9375rem", fontWeight: 600 }}>Route Performance (last 24h)</h3>
+                            </div>
+                            <div style={{ overflowX: "auto" }}>
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Method</th>
+                                            <th>Route</th>
+                                            <th style={{ textAlign: "right" }}>Calls</th>
+                                            <th style={{ textAlign: "right" }}>Avg</th>
+                                            <th style={{ textAlign: "right" }}>p50</th>
+                                            <th style={{ textAlign: "right" }}>p95</th>
+                                            <th style={{ textAlign: "right" }}>p99</th>
+                                            <th style={{ textAlign: "right" }}>Errors</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {routeStats.map((r, i) => (
+                                            <tr key={i}>
+                                                <td>
+                                                    <span style={{ fontSize: "0.6875rem", fontWeight: 700, padding: "0.15rem 0.45rem", borderRadius: 4, background: `${methodColor(r.method)}18`, color: methodColor(r.method), fontFamily: "JetBrains Mono, monospace" }}>
+                                                        {r.method}
+                                                    </span>
+                                                </td>
+                                                <td style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.8125rem", color: "var(--text-primary)" }}>{r.route}</td>
+                                                <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: "var(--text-secondary)" }}>{r.count}</td>
+                                                <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: "var(--text-secondary)" }}>{r.avg}ms</td>
+                                                <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace" }}>{r.p50}ms</td>
+                                                <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: r.p95 > 500 ? "#F59E0B" : "inherit" }}>{r.p95}ms</td>
+                                                <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: r.p99 > 1000 ? "#EF4444" : r.p99 > 500 ? "#F59E0B" : "inherit" }}>{r.p99}ms</td>
+                                                <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: r.error_count > 0 ? "#EF4444" : "#10B981" }}>
+                                                    {r.error_count > 0 ? `${r.error_count} (${r.error_rate}%)` : "0"}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Recent Traces */}
+                    {traces.length > 0 && (
+                        <div className="surface" style={{ overflow: "hidden" }}>
+                            <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid var(--border)" }}>
+                                <h3 style={{ margin: 0, fontSize: "0.9375rem", fontWeight: 600 }}>Recent Traces</h3>
+                            </div>
+                            <div style={{ overflowX: "auto" }}>
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Trace ID</th>
+                                            <th>Method</th>
+                                            <th>Route</th>
+                                            <th style={{ textAlign: "right" }}>Status</th>
+                                            <th style={{ textAlign: "right" }}>Duration</th>
+                                            <th style={{ textAlign: "right" }}>When</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {traces.map((t, i) => (
+                                            <tr key={i}>
+                                                <td style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.75rem", color: "var(--text-muted)" }}>{t.trace_id}</td>
+                                                <td>
+                                                    <span style={{ fontSize: "0.6875rem", fontWeight: 700, padding: "0.15rem 0.45rem", borderRadius: 4, background: `${methodColor(t.method)}18`, color: methodColor(t.method), fontFamily: "JetBrains Mono, monospace" }}>
+                                                        {t.method}
+                                                    </span>
+                                                </td>
+                                                <td style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.8125rem", color: "var(--text-primary)" }}>{t.route}</td>
+                                                <td style={{ textAlign: "right" }}>
+                                                    <span style={{ fontSize: "0.75rem", fontWeight: 600, fontFamily: "JetBrains Mono, monospace", color: t.http_status >= 400 ? "#EF4444" : t.http_status >= 300 ? "#F59E0B" : "#10B981" }}>
+                                                        {t.http_status || "—"}
+                                                    </span>
+                                                </td>
+                                                <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: t.duration_ms > 500 ? "#F59E0B" : "var(--text-secondary)" }}>{t.duration_ms}ms</td>
+                                                <td style={{ textAlign: "right", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{timeAgo(t.timestamp)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </DashboardLayout>

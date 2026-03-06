@@ -18,3 +18,5 @@ gunicorn      # (WSGI server for production)
 sendgrid
 httpx
 psycopg2-binary
+opentelemetry-sdk
+opentelemetry-instrumentation-flask
