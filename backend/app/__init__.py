@@ -26,7 +26,13 @@ def _real_ip():
 
 
 # Global default: 200 requests/minute per IP. Auth routes override with stricter limits.
-limiter = Limiter(key_func=_real_ip, default_limits=["200 per minute"])
+# Uses Redis when REDIS_URL env var is set (Railway Redis service), falls back to
+# in-memory for local dev. Redis makes limits accurate across all Gunicorn workers.
+limiter = Limiter(
+    key_func=_real_ip,
+    default_limits=["200 per minute"],
+    storage_uri=os.getenv("REDIS_URL", "memory://"),
+)
 
 # Define Bearer Authentication for Swagger UI
 authorizations = {

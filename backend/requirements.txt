@@ -21,3 +21,4 @@ psycopg2-binary
 opentelemetry-sdk
 opentelemetry-instrumentation-flask
 Flask-Limiter>=3.0
+redis
