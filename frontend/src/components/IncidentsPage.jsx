@@ -16,7 +16,9 @@ const getSeverity = (alert_type = "") => {
 
 const timeAgo = (ts) => {
     if (!ts) return "—";
-    const diff = Math.floor((Date.now() - new Date(ts)) / 1000);
+    const normalized = typeof ts === "string" && !ts.endsWith("Z") && !ts.includes("+") ? ts + "Z" : ts;
+    const diff = Math.floor((Date.now() - new Date(normalized)) / 1000);
+    if (diff < 0) return "just now";
     if (diff < 60) return `${diff}s ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -167,7 +169,7 @@ export default function IncidentsPage() {
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.2rem" }}>
                                             <span style={{ fontWeight: 500, fontSize: "0.875rem", color: "var(--text-primary)" }}>
-                                                {`Site #${alert.website_id}`}
+                                                {alert.website_name || `Site #${alert.website_id}`}
                                             </span>
                                             <span style={{
                                                 padding: "0.1rem 0.45rem", borderRadius: 9999, fontSize: "0.65rem", fontWeight: 700,

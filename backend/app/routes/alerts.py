@@ -92,6 +92,7 @@ class GetAlerts(Resource):
         website_id = request.args.get("website_id", type=int)
         user_websites = Website.query.filter_by(user_id=current_user.id).all()
         user_website_ids = {website.id for website in user_websites}
+        website_names = {website.id: website.name for website in user_websites}
 
         if website_id and website_id not in user_website_ids:
             return {"error": "Website not found or unauthorized"}, 404
@@ -104,6 +105,7 @@ class GetAlerts(Resource):
         return [{
             "id": alert.id,
             "website_id": alert.website_id,
+            "website_name": website_names.get(alert.website_id, f"Site #{alert.website_id}"),
             "alert_type": alert.alert_type,
             "status": alert.status,
             "timestamp": alert.timestamp.isoformat(),
