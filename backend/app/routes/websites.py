@@ -53,13 +53,19 @@ class AddWebsite(Resource):
         from app.models import Website  # Avoid circular imports
 
         data = request.get_json()
-        url = data.get("url")
-        name = data.get("name")
+        url = data.get("url", "")
+        name = data.get("name", "")
         frequency = data.get("frequency", 5)
 
         #Validate Required Fields
         if not url or not name:
             return {"error": "Missing required fields"}, 400
+        if len(url) > 200:
+            return {"error": "URL must be 200 characters or fewer"}, 400
+        if len(name) > 100:
+            return {"error": "Name must be 100 characters or fewer"}, 400
+        if not isinstance(frequency, int) or not (1 <= frequency <= 1440):
+            return {"error": "Frequency must be between 1 and 1440 minutes"}, 400
 
         # Create new Website object
         new_website = Website(user_id=current_user.id, url=url, name=name, frequency=frequency)

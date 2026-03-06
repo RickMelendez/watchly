@@ -1,7 +1,7 @@
 import os
 import re
 from urllib.parse import urlparse
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request as flask_request
 from sqlalchemy.pool import NullPool
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
@@ -10,12 +10,23 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from sqlalchemy.orm import sessionmaker
 from flask_cors import CORS
+from flask_limiter import Limiter
 
 
 load_dotenv() #Loading env
 db = SQLAlchemy(engine_options={"pool_pre_ping": True, "poolclass": NullPool})
 migrate = Migrate()
 jwt = JWTManager()
+
+
+def _real_ip():
+    """Return the real client IP, respecting Railway/Cloudflare X-Forwarded-For headers."""
+    xff = flask_request.headers.get("X-Forwarded-For", "")
+    return xff.split(",")[0].strip() if xff else flask_request.remote_addr
+
+
+# Global default: 200 requests/minute per IP. Auth routes override with stricter limits.
+limiter = Limiter(key_func=_real_ip, default_limits=["200 per minute"])
 
 # Define Bearer Authentication for Swagger UI
 authorizations = {
@@ -78,6 +89,7 @@ def create_app():
     api.init_app(app)  # Initialize Flask-RESTx API
     migrate.init_app(app, db)
     jwt.init_app(app)
+    limiter.init_app(app)
 
     # Initialize SessionLocal AFTER app & db are set up
     with app.app_context():

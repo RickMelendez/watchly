@@ -1,11 +1,11 @@
+import os
 from datetime import datetime, timedelta
 from flask_restx import Namespace, Resource, fields
 from functools import wraps
 from flask import jsonify, request
 from app.models import User, Website, Metric, Alert
-from app import db
+from app import db, limiter
 import jwt
-from app.config import SECRET_KEY
 from app.utils.logger import logger
 from flask_jwt_extended import create_access_token
 
@@ -45,8 +45,8 @@ change_password_model = auth_ns.model("ChangePassword", {
     "new_password": fields.String(required=True, description="New Password")
 })
 
-#Secret key for jwt
-SECRET_KEY = "This_Is_The_Key"
+# JWT signing key — read from environment variable so it is never hardcoded in source
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "watchly-change-me-in-production")
 
 #Helper function to check validity
 # of token for protected routes.
@@ -95,16 +95,26 @@ class RegisterUser(Resource):
     @auth_ns.response(201, "User Registered Successfully!", user_model)
     @auth_ns.response(400, "Missing Required Fields")
     @auth_ns.response(409, "Email Already Exists")
+    @limiter.limit("5 per minute")
     def post(self):
         """Register a new user"""
         data = request.get_json()
         #Extract and validate input
-        name = data.get('name')
-        email = data.get('email')
-        password = data.get('password')
+        name = data.get('name', '')
+        email = data.get('email', '')
+        password = data.get('password', '')
 
         if not name or not email or not password:
             return {"error": "Missing required fields"}, 400
+
+        if len(name) > 100:
+            return {"error": "Name must be 100 characters or fewer"}, 400
+        if len(email) > 200:
+            return {"error": "Email must be 200 characters or fewer"}, 400
+        if len(password) < 8:
+            return {"error": "Password must be at least 8 characters"}, 400
+        if len(password) > 128:
+            return {"error": "Password must be 128 characters or fewer"}, 400
 
         #Check if email already registered
         if User.query.filter_by(email=email).first():
@@ -139,17 +149,21 @@ class LoginUser(Resource):
     @auth_ns.response(200, "Login Successful!", token_model)
     @auth_ns.response(400, "Missing Email or Password")
     @auth_ns.response(401, "Invalid Email or Password")
+    @limiter.limit("10 per minute")
     def post(self):
         """User Login"""
         data = request.get_json()
 
         # Extract and validate
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get('email', '')
+        password = data.get('password', '')
 
         if not email or not password:
             logger.warning("Login attempt with missing credentials")
             return {"error": "Missing email or password"}, 400
+
+        if len(email) > 200 or len(password) > 128:
+            return {"error": "Invalid credentials"}, 401
 
         # Fetch user by email
         user = User.query.filter_by(email=email).first()
