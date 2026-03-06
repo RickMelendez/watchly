@@ -43,7 +43,11 @@ export default function IncidentsPage() {
         }
     }, []);
 
-    useEffect(() => { fetchAlerts(); }, [fetchAlerts]);
+    useEffect(() => {
+        fetchAlerts();
+        const id = setInterval(fetchAlerts, 30000);
+        return () => clearInterval(id);
+    }, [fetchAlerts]);
 
     const handleResolve = async (alertId) => {
         setResolving(p => ({ ...p, [alertId]: true }));

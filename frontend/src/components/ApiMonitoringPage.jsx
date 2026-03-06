@@ -59,7 +59,11 @@ export default function ApiMonitoringPage() {
         }
     }, []);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => {
+        load();
+        const id = setInterval(load, 30000);
+        return () => clearInterval(id);
+    }, [load]);
 
     const {
         total_endpoints = 0,

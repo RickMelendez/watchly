@@ -50,6 +50,8 @@ const UptimePage = () => {
 
     useEffect(() => {
         enrichData();
+        const id = setInterval(enrichData, 30000);
+        return () => clearInterval(id);
     }, [enrichData]);
 
     const overallUptime = enrichedSites.length
