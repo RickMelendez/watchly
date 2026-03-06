@@ -1,20 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Activity, Bell, Shield, LineChart, Zap, ArrowRight, Check } from "lucide-react";
+import { Activity, Bell, Shield, LineChart, Zap, ArrowRight } from "lucide-react";
 import { DottedSurface } from "./ui/dotted-surface";
 import { Navbar } from "./ui/3d-interactive-navbar";
 import DisplayCards from "./ui/display-cards";
 import { WordRotate } from "./ui/word-rotate";
-import TimeLine_01 from "./ui/release-time-line";
+import Timeline01 from "./ui/release-time-line";
 import { Accordian } from "./ui/accordian";
 import { Footer } from "./ui/footer";
-
-const NAV_ITEMS = [
-  { id: 1, title: "Features", url: "#features" },
-  { id: 2, title: "Docs", url: "/docs" },
-  { id: 3, title: "Pricing", url: "#pricing" },
-];
 
 const FEATURES = [
   {
@@ -206,7 +200,7 @@ const LandingPage = () => {
       </section>
 
       {/* New TimeLine Component */}
-      <TimeLine_01 />
+      <Timeline01 />
 
       {/* Features Grid */}
       <section id="features" className="py-24 border-t border-white/10 relative z-10 bg-black/80 backdrop-blur-sm">
