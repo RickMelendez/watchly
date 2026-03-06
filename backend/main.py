@@ -36,14 +36,9 @@ def initialize_app():
     AUTO_CREATE_SCHEMA is intentionally disabled by default in production to
     avoid race conditions across Gunicorn workers with Postgres.
     """
-    should_create_schema = os.getenv("AUTO_CREATE_SCHEMA", "0").lower() in ("1", "true", "yes")
-
-    if should_create_schema:
-        with app.app_context():
-            # Prefer migrations in production; this is opt-in for local bootstrap.
-            db.create_all()
-    else:
-        print("INFO: Skipping db.create_all() (AUTO_CREATE_SCHEMA disabled).")
+    with app.app_context():
+        # Idempotent — only creates tables that don't exist yet, never drops or alters.
+        db.create_all()
 
     if is_main_worker():
         print("Primary worker elected: Starting background monitoring scheduler...")

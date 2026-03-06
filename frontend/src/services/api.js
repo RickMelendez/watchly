@@ -75,6 +75,25 @@ export const getDashboardSummary = () => api.get("/dashboard/summary");
 // Analytics
 export const getAnalyticsSummary = () => api.get("/analytics/summary");
 
+// Containers
+export const getContainers = () => api.get("/containers/");
+export const getContainerSummary = () => api.get("/containers/summary");
+export const addContainer = (data) => api.post("/containers/", data);
+export const updateContainer = (id, data) => api.patch(`/containers/${id}`, data);
+export const deleteContainer = (id) => api.delete(`/containers/${id}`);
+
+// Deployments
+export const getDeployments = () => api.get("/deployments/");
+export const getDeploymentSummary = () => api.get("/deployments/summary");
+export const addDeployment = (data) => api.post("/deployments/", data);
+export const deleteDeployment = (id) => api.delete(`/deployments/${id}`);
+
+// Pipelines
+export const getPipelines = () => api.get("/pipelines/");
+export const getPipelineSummary = () => api.get("/pipelines/summary");
+export const addPipeline = (data) => api.post("/pipelines/", data);
+export const deletePipeline = (id) => api.delete(`/pipelines/${id}`);
+
 // Fetch Website Metrics (Uptime & Response Time)
 export const fetchWebsiteMetrics = async (websiteId) => {
   try {

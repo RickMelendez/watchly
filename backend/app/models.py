@@ -65,3 +65,52 @@ class Alert(db.Model):
     alert_type = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), default="unresolved")
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+#Container Model
+class Container(db.Model):
+    __tablename__ = 'container'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False, index=True)
+    name = db.Column(db.String(100), nullable=False)
+    image = db.Column(db.String(200), nullable=False)
+    status = db.Column(db.String(50), default="running")  # running, stopped, error
+    cpu_percent = db.Column(db.Float, default=0.0)
+    memory_used = db.Column(db.Integer, default=0)    # MB
+    memory_limit = db.Column(db.Integer, default=512)  # MB
+    ports = db.Column(db.String(200), default="")
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+#Deployment Model
+class Deployment(db.Model):
+    __tablename__ = 'deployment'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False, index=True)
+    service = db.Column(db.String(100), nullable=False)
+    version = db.Column(db.String(50), nullable=False)
+    commit_hash = db.Column(db.String(40), default="")
+    branch = db.Column(db.String(100), default="main")
+    environment = db.Column(db.String(50), default="production")  # production, staging, dev
+    status = db.Column(db.String(50), default="success")          # success, failed, in_progress
+    duration_seconds = db.Column(db.Integer, default=0)
+    deployed_by = db.Column(db.String(100), default="")
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+#Pipeline Model
+class Pipeline(db.Model):
+    __tablename__ = 'pipeline'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False, index=True)
+    run_id = db.Column(db.String(50), nullable=False)
+    trigger = db.Column(db.String(50), default="push")    # push, manual, schedule, pr
+    commit_message = db.Column(db.String(200), default="")
+    branch = db.Column(db.String(100), default="main")
+    commit_hash = db.Column(db.String(40), default="")
+    author = db.Column(db.String(100), default="")
+    status = db.Column(db.String(50), default="success")  # success, failed, running, cancelled
+    stages = db.Column(db.Text, default="[]")             # JSON array of stage objects
+    duration_seconds = db.Column(db.Integer, default=0)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
