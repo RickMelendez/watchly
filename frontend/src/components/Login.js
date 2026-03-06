@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Terminal, ArrowRight, Shield } from "lucide-react";
+import { Terminal, ArrowRight, Shield, Eye, EyeOff } from "lucide-react";
 import api from "../services/api";
 
 const TERMINAL_LINES = [
@@ -59,15 +59,31 @@ export default function Login({ onLogin }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
 
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/
+      );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (isSignUp) {
         const res = await api.post("/auth/register", { name, email, password });
@@ -177,7 +193,38 @@ export default function Login({ onLogin }) {
 
             <div>
               <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 500, color: "var(--text-secondary)", marginBottom: "0.375rem" }}>Password</label>
-              <input className="input-dark" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete={isSignUp ? "new-password" : "current-password"} />
+              <div style={{ position: "relative" }}>
+                <input
+                  className="input-dark"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
+                  style={{ width: "100%", paddingRight: "2.5rem", boxSizing: "border-box" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: 0,
+                    height: "100%",
+                    padding: "0 0.75rem",
+                    background: "none",
+                    border: "none",
+                    color: "var(--text-muted)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center"
+                  }}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             <button className="btn-accent" type="submit" disabled={isLoading} style={{ marginTop: "0.25rem", justifyContent: "center", padding: "0.625rem" }}>

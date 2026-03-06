@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Activity, Bell, Shield, LineChart, Zap, ArrowRight, Check } from "lucide-react";
 import { DottedSurface } from "./ui/dotted-surface";
-import NavBar from "./ui/navbar";
+import { Navbar } from "./ui/3d-interactive-navbar";
+import DisplayCards from "./ui/display-cards";
+import { WordRotate } from "./ui/word-rotate";
+import TimeLine_01 from "./ui/release-time-line";
 import { Accordian } from "./ui/accordian";
 import { Footer } from "./ui/footer";
 
@@ -99,94 +102,119 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <DottedSurface />
+    <div className="min-h-screen bg-black text-white selection:bg-fuchsia-500/30 font-sans overflow-x-hidden relative">
+      <div className="fixed inset-0 z-0 bg-black pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-fuchsia-600/20 blur-[150px] animate-pulse" style={{ animationDuration: '20s' }} />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/20 blur-[150px] animate-pulse" style={{ animationDuration: '25s', animationDelay: '5s' }} />
+        <DottedSurface />
+      </div>
 
-      {/* Sticky Navbar */}
-      <header className="fixed top-0 left-0 w-full z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <span
-            className="text-xl font-bold text-foreground cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            Watchly
-          </span>
-          <NavBar list={NAV_ITEMS} />
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/login")}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate("/login")}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              Get Started <ArrowRight size={16} />
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Interactive 3D Navbar */}
+      <div className="fixed top-0 left-0 w-full z-50">
+        <Navbar />
+      </div>
 
       {/* Hero */}
-      <section className="container mx-auto px-6 pt-40 pb-28 text-center">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col items-center gap-6"
-        >
-          <motion.span
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium"
+      <section className="container relative z-10 mx-auto px-6 pt-40 pb-28">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col items-center lg:items-start text-center lg:text-left gap-6 flex-1"
           >
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            Intelligent System Monitoring
-          </motion.span>
-
-          <motion.h1
-            variants={itemVariants}
-            className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight"
-          >
-            Monitor Your Systems
-            <br />
-            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              With Precision
-            </span>
-          </motion.h1>
-
-          <motion.p
-            variants={itemVariants}
-            className="max-w-2xl text-lg md:text-xl text-muted-foreground"
-          >
-            Get real-time insights and instant alerts. Keep your systems running smoothly with Watchly's advanced monitoring solution.
-          </motion.p>
-
-          <motion.div variants={itemVariants} className="flex items-center gap-4">
-            <button
-              onClick={() => navigate("/login")}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/30"
+            <motion.span
+              variants={itemVariants}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-400 text-sm font-bold tracking-wide shadow-[0_0_15px_rgba(217,70,239,0.2)]"
             >
-              Start Monitoring Free <ArrowRight size={18} />
-            </button>
-            <button
-              onClick={() => navigate("/docs")}
-              className="px-6 py-3 rounded-lg font-medium border border-border text-foreground hover:bg-muted transition-colors"
+              <span className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse shadow-[0_0_8px_rgba(217,70,239,0.8)]" />
+              Watchly Advanced Observatory
+            </motion.span>
+
+            <motion.h1
+              variants={itemVariants}
+              className="text-6xl md:text-8xl font-black tracking-tighter leading-[1.1]"
             >
-              View Docs
-            </button>
+              Stop Guessing.
+              <br />
+              <div className="bg-gradient-to-r flex justify-center lg:justify-start from-fuchsia-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent pb-4">
+                <WordRotate words={["Monitor Everything.", "Ship Faster.", "Sleep Better.", "Catch Errors."]} className="text-inherit pb-2 h-[1.2em]" />
+              </div>
+            </motion.h1>
+
+            <motion.p
+              variants={itemVariants}
+              className="max-w-xl text-lg md:text-2xl text-neutral-400 font-medium leading-relaxed"
+            >
+              The ultimate developer platform for real-time insights, CI/CD pipeline tracking, and instant alerts. Build with confidence.
+            </motion.p>
+
+            <motion.div variants={itemVariants} className="flex items-center gap-6 pt-6">
+              <button
+                onClick={() => navigate("/login")}
+                className="group relative inline-flex items-center gap-2 bg-white text-black px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.3)] overflow-hidden"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-white via-neutral-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="relative z-10 flex items-center gap-2">Start Monitoring Free <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" /></span>
+              </button>
+              <button
+                onClick={() => navigate("/docs")}
+                className="px-8 py-4 rounded-xl font-bold text-lg border border-white/20 text-white hover:bg-white/10 transition-colors"
+              >
+                View Docs
+              </button>
+            </motion.div>
           </motion.div>
-        </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex-1 w-full max-w-lg hidden lg:flex justify-center items-center"
+          >
+            <DisplayCards cards={[
+              {
+                icon: <Activity className="size-4 text-green-300" />,
+                title: "Uptime",
+                description: "100% Operational",
+                date: "Just now",
+                iconClassName: "text-green-500",
+                titleClassName: "text-green-500",
+                className: "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+              },
+              {
+                icon: <Zap className="size-4 text-blue-300" />,
+                title: "Performance",
+                description: "32ms Avg Response",
+                date: "2 mins ago",
+                iconClassName: "text-blue-500",
+                titleClassName: "text-blue-500",
+                className: "[grid-area:stack] translate-x-12 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+              },
+              {
+                icon: <Shield className="size-4 text-purple-300" />,
+                title: "Security",
+                description: "SSL Certificate Valid",
+                date: "Today",
+                iconClassName: "text-purple-500",
+                titleClassName: "text-purple-500",
+                className: "[grid-area:stack] translate-x-24 translate-y-20 hover:translate-y-10",
+              }
+            ]} />
+          </motion.div>
+        </div>
       </section>
 
+      {/* New TimeLine Component */}
+      <TimeLine_01 />
+
       {/* Features Grid */}
-      <section id="features" className="py-24 border-t border-border/50">
+      <section id="features" className="py-24 border-t border-white/10 relative z-10 bg-black/80 backdrop-blur-sm">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Everything you need to stay in control</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              A complete toolkit for monitoring the reliability and performance of your infrastructure.
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-white tracking-tight">Everything you need to ship fearlessly</h2>
+            <p className="text-neutral-400 text-xl max-w-2xl mx-auto font-medium">
+              A complete toolkit for monitoring the reliability, performance, and security of your modern infrastructure.
             </p>
           </div>
 
@@ -195,19 +223,19 @@ const LandingPage = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {FEATURES.map((feature) => (
               <motion.div
                 key={feature.title}
                 variants={itemVariants}
-                className={`p-6 rounded-2xl border border-border/60 bg-gradient-to-br ${feature.color} backdrop-blur-sm hover:border-border transition-all duration-300 group`}
+                className="p-8 rounded-3xl border border-white/10 bg-neutral-950/50 backdrop-blur-md hover:bg-neutral-900/80 hover:border-white/20 transition-all duration-500 group shadow-[0_0_30px_rgba(0,0,0,0.5)]"
               >
-                <div className="w-12 h-12 rounded-xl bg-card flex items-center justify-center mb-4 border border-border/60">
-                  <feature.icon className={feature.iconColor} size={22} />
+                <div className="w-14 h-14 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                  <feature.icon className={feature.iconColor} size={28} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-bold mb-3 text-white tracking-wide">{feature.title}</h3>
+                <p className="text-neutral-400 text-base leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -215,124 +243,39 @@ const LandingPage = () => {
       </section>
 
       {/* FAQ */}
-      <section className="py-24 border-t border-border/50">
-        <div className="container mx-auto px-6 max-w-2xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-muted-foreground">Everything you need to know about Watchly.</p>
+      <section className="py-24 border-t border-white/10 relative z-10 bg-black">
+        <div className="container mx-auto px-6 max-w-3xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight text-white">Frequently Asked Questions</h2>
+            <p className="text-neutral-400 text-xl font-medium">Everything you need to know about Watchly.</p>
           </div>
           <Accordian items={FAQ_ITEMS} title="" />
         </div>
       </section>
 
 
-      {/* Pricing */}
-      <section id="pricing" className="py-24 border-t border-border/50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Simple, transparent pricing</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Start free and scale as you grow. No hidden fees.
-            </p>
-          </div>
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto"
-          >
-            {[
-              {
-                name: "Free",
-                price: "$0",
-                period: "forever",
-                description: "Perfect for personal projects",
-                features: ["5 websites", "5-min check interval", "Email alerts", "7-day history"],
-                cta: "Get Started",
-                highlight: false,
-              },
-              {
-                name: "Pro",
-                price: "$19",
-                period: "/ month",
-                description: "For growing teams",
-                features: ["50 websites", "30-sec check interval", "Email + SMS alerts", "90-day history", "API access", "Status pages"],
-                cta: "Start Free Trial",
-                highlight: true,
-              },
-              {
-                name: "Enterprise",
-                price: "Custom",
-                period: "",
-                description: "For large organizations",
-                features: ["Unlimited websites", "10-sec check interval", "All alert channels", "Unlimited history", "SLA guarantee", "Dedicated support"],
-                cta: "Contact Sales",
-                highlight: false,
-              },
-            ].map((plan) => (
-              <motion.div
-                key={plan.name}
-                variants={itemVariants}
-                className={`relative p-8 rounded-2xl border flex flex-col gap-6 transition-all duration-300 ${plan.highlight
-                    ? "border-primary bg-primary/5 shadow-xl shadow-primary/10 scale-105"
-                    : "border-border/60 bg-card hover:border-border"
-                  }`}
-              >
-                {plan.highlight && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-                    Most Popular
-                  </span>
-                )}
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">{plan.name}</h3>
-                  <div className="flex items-end gap-1">
-                    <span className="text-4xl font-extrabold">{plan.price}</span>
-                    <span className="text-muted-foreground text-sm mb-1">{plan.period}</span>
-                  </div>
-                  <p className="text-muted-foreground text-sm mt-2">{plan.description}</p>
-                </div>
-                <ul className="flex flex-col gap-2 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <Check size={15} className="text-primary shrink-0" />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => navigate("/login")}
-                  className={`w-full py-2.5 rounded-xl font-medium text-sm transition-colors ${plan.highlight
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "border border-border hover:bg-muted"
-                    }`}
-                >
-                  {plan.cta}
-                </button>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="py-24 border-t border-border/50">
-        <div className="container mx-auto px-6 text-center">
+      <section className="py-32 border-t border-white/10 relative z-10 bg-black">
+        <div className="absolute top-[0%] left-[-10%] w-[50%] h-[100%] rounded-[100%] bg-indigo-600/10 blur-[150px] pointer-events-none" />
+        <div className="container mx-auto px-6 text-center relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="max-w-2xl mx-auto"
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto bg-neutral-900/40 border border-white/10 p-16 rounded-[3rem] backdrop-blur-xl shadow-2xl relative overflow-hidden"
           >
-            <h2 className="text-4xl font-bold mb-4">Ready to take control?</h2>
-            <p className="text-muted-foreground text-lg mb-8">
-              Join thousands of teams monitoring their systems with Watchly.
+            <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/10 to-indigo-500/10 pointer-events-none" />
+            <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight text-white relative z-10">Ready to take control?</h2>
+            <p className="text-neutral-300 text-xl md:text-2xl mb-12 font-medium max-w-2xl mx-auto relative z-10">
+              Join thousands of engineering teams tracking their modern infrastructure with Watchly.
             </p>
             <button
               onClick={() => navigate("/login")}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary/90 transition-all shadow-xl shadow-primary/30"
+              className="relative z-10 inline-flex items-center gap-3 bg-white text-black px-10 py-5 rounded-2xl font-black text-xl hover:scale-105 transition-all duration-300 shadow-[0_0_50px_rgba(255,255,255,0.4)] overflow-hidden group"
             >
-              Get Started Now <ArrowRight size={20} />
+              <span className="absolute inset-0 bg-gradient-to-r from-white via-neutral-200 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <span className="relative z-10 flex items-center gap-3">Deploy Watchly Now <ArrowRight size={24} className="transition-transform group-hover:translate-x-2" /></span>
             </button>
           </motion.div>
         </div>
