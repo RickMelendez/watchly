@@ -69,6 +69,9 @@ export const addMetric = (metricData) => api.post("/metrics/add", metricData);
 export const getAlerts = (websiteId) => api.get(`/alerts?website_id=${websiteId}`);
 export const updateAlert = (alertId, status) => api.patch(`/alerts/${alertId}`, { status });
 
+// Dashboard
+export const getDashboardSummary = () => api.get("/dashboard/summary");
+
 // Fetch Website Metrics (Uptime & Response Time)
 export const fetchWebsiteMetrics = async (websiteId) => {
   try {

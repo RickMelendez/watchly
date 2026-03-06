@@ -90,12 +90,14 @@ def create_app():
     from app.routes.metrics import metrics_ns
     from app.routes.auth import auth_ns
     from app.routes.status import status_ns
+    from app.routes.dashboard import dashboard_ns
 
     api.add_namespace(alerts_ns, path="/alerts")  # Register namespaces
     api.add_namespace(websites_ns, path="/websites")
     api.add_namespace(metrics_ns, path="/metrics")
     api.add_namespace(auth_ns, path="/auth")
     api.add_namespace(status_ns, path="/status")
+    api.add_namespace(dashboard_ns, path="/dashboard")
 
     @app.route("/", methods=['GET'])
     def index_route():

@@ -11,5 +11,9 @@
   "license": "ISC",
   "devDependencies": {
     "wrangler": "^3.110.0"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0"
   }
 }

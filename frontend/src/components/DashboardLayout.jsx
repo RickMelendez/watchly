@@ -22,7 +22,6 @@ const NAV = [
         group: "OVERVIEW",
         items: [
             { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-            { label: "Analytics", icon: Activity, path: "/dashboard/analytics" },
         ],
     },
     {
@@ -42,6 +41,12 @@ const NAV = [
             { label: "Logs", icon: FileText, path: "/dashboard/logs" },
             { label: "API Monitoring", icon: Activity, path: "/dashboard/api-monitoring" },
             { label: "Security", icon: Settings, path: "/dashboard/security" },
+        ],
+    },
+    {
+        group: "INSIGHTS",
+        items: [
+            { label: "Analytics", icon: Activity, path: "/dashboard/analytics" },
         ],
     },
 ];
