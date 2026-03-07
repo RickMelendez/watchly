@@ -29,6 +29,7 @@ interface PricingCardProps {
   cta: string;
   href: string;
   featured?: boolean;
+  contactSales?: boolean;
 }
 
 const pricingData: PricingCardProps[] = [
@@ -74,6 +75,25 @@ const pricingData: PricingCardProps[] = [
     href: "/login",
     featured: false,
   },
+  {
+    title: "Enterprise",
+    price: "Custom",
+    description: "For large teams with custom security and compliance needs.",
+    features: [
+      "Everything in Business",
+      "Custom check frequency",
+      "Dedicated infrastructure",
+      "Custom data retention",
+      "SLA guarantee",
+      "SAML / SSO",
+      "Audit logs",
+      "Onboarding support",
+    ],
+    cta: "Contact Sales",
+    href: "mailto:hello@watchly.io?subject=Enterprise%20Plan%20Inquiry",
+    featured: false,
+    contactSales: true,
+  },
 ];
 
 interface PricingSectionProps {
@@ -89,7 +109,7 @@ export default function PricingSection({ onNavigate }: PricingSectionProps) {
           Select the plan that best suits your needs.
         </p>
 
-        <div className="not-prose mt-6 grid w-full grid-cols-1 gap-6 min-[900px]:grid-cols-3">
+        <div className="not-prose mt-6 grid w-full grid-cols-1 gap-6 min-[900px]:grid-cols-2 min-[1200px]:grid-cols-4">
           {pricingData.map((plan) => (
             <PricingCard key={plan.title} plan={plan} onNavigate={onNavigate} />
           ))}
@@ -117,6 +137,14 @@ function PricingCard({
   plan: PricingCardProps;
   onNavigate?: (path: string) => void;
 }) {
+  const handleCta = () => {
+    if (plan.contactSales) {
+      window.location.href = plan.href;
+    } else {
+      onNavigate?.(plan.href);
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -168,7 +196,7 @@ function PricingCard({
               : "bg-neutral-800 hover:bg-neutral-700 text-white border border-white/10",
           )}
           variant={plan.featured ? "default" : "secondary"}
-          onClick={() => onNavigate?.(plan.href)}
+          onClick={handleCta}
         >
           {plan.cta}
         </Button>

@@ -7,9 +7,9 @@ const PLANS = [
   {
     id: "starter",
     name: "Starter",
-    price: 0,
-    priceLabel: "Free",
-    period: "",
+    price: 9,
+    priceLabel: "$9",
+    period: "/month",
     description: "Perfect for personal projects and small sites.",
     features: [
       "5 websites monitored",
@@ -18,15 +18,15 @@ const PLANS = [
       "7-day metric history",
       "Public status page",
     ],
-    cta: "Get Started Free",
+    cta: "Get Started",
     highlighted: false,
-    stripePriceId: null,
+    stripePriceId: process.env.REACT_APP_STRIPE_PRICE_STARTER,
   },
   {
     id: "pro",
     name: "Pro",
-    price: 19,
-    priceLabel: "$19",
+    price: 29,
+    priceLabel: "$29",
     period: "/month",
     description: "For teams that need reliability and deeper insights.",
     features: [
@@ -35,16 +35,16 @@ const PLANS = [
       "Email + SMS alerts",
       "90-day metric history",
       "API access",
-      "Custom integrations",
+      "AI incident analysis",
       "Priority support",
     ],
     cta: "Start 14-day Free Trial",
     highlighted: true,
-    stripePriceId: process.env.REACT_APP_STRIPE_PRO_PRICE_ID,
+    stripePriceId: process.env.REACT_APP_STRIPE_PRICE_PRO,
   },
   {
-    id: "enterprise",
-    name: "Enterprise",
+    id: "business",
+    name: "Business",
     price: 79,
     priceLabel: "$79",
     period: "/month",
@@ -54,14 +54,36 @@ const PLANS = [
       "5-second check interval",
       "All alert channels",
       "1-year metric history",
+      "AI root cause analysis",
       "Dedicated support",
       "Custom SLA",
       "SSO & SAML",
+    ],
+    cta: "Start 14-day Free Trial",
+    highlighted: false,
+    stripePriceId: process.env.REACT_APP_STRIPE_PRICE_BUSINESS,
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: null,
+    priceLabel: "Custom",
+    period: "",
+    description: "For large teams with custom security and compliance needs.",
+    features: [
+      "Everything in Business",
+      "Custom check frequency",
+      "Dedicated infrastructure",
       "Custom data retention",
+      "SLA guarantee",
+      "SAML / SSO",
+      "Audit logs",
+      "Onboarding support",
     ],
     cta: "Contact Sales",
     highlighted: false,
-    stripePriceId: process.env.REACT_APP_STRIPE_ENTERPRISE_PRICE_ID,
+    stripePriceId: null,
+    contactSales: true,
   },
 ];
 
@@ -71,6 +93,11 @@ export default function PricingPage() {
   const [error, setError] = useState("");
 
   const handleSubscribe = async (plan) => {
+    if (plan.contactSales) {
+      window.location.href = "mailto:hello@watchly.io?subject=Enterprise%20Plan%20Inquiry";
+      return;
+    }
+
     if (!plan.stripePriceId) {
       navigate("/login");
       return;
