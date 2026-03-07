@@ -16,7 +16,7 @@ import {
     GitBranch,
     Shield,
 } from "lucide-react";
-import { ThemeToggle } from "./ui/theme-toggle";
+
 
 const NAV = [
     {
@@ -281,9 +281,6 @@ export default function DashboardLayout({
                                 />
                             </button>
                         )}
-
-                        {/* Theme toggle */}
-                        <ThemeToggle />
 
                         {/* Alerts bell */}
                         <button

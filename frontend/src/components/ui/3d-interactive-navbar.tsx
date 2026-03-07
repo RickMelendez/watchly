@@ -335,24 +335,20 @@ const navItems: NavItem[] = [
         href: "/",
     },
     {
+        title: "FEATURES",
+        href: "/",
+    },
+    {
+        title: "PRICING",
+        href: "/pricing",
+    },
+    {
         title: "DOCS",
         href: "/docs",
     },
     {
-        title: "EXAMPLES",
-        href: "/examples",
-    },
-    {
-        title: "TEMPLATES",
-        href: "/templates",
-    },
-    {
-        title: "BLOG",
-        href: "/blog",
-    },
-    {
-        title: "GITHUB",
-        href: "/github",
+        title: "LOGIN",
+        href: "/login",
     },
 ];
 
