@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ArrowLeft, Zap } from "lucide-react";
-import { apiRequest } from "../services/api";
+import api from "../services/api";
 
 const PLANS = [
   {
@@ -113,10 +113,7 @@ export default function PricingPage() {
     setError("");
 
     try {
-      const data = await apiRequest("/billing/create-checkout-session", {
-        method: "POST",
-        body: JSON.stringify({ price_id: plan.stripePriceId }),
-      });
+      const { data } = await api.post("/billing/create-checkout-session", { price_id: plan.stripePriceId });
       if (data.url) {
         window.location.href = data.url;
       }
