@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Search, RefreshCw, Plus, Trash2, X } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import { getLogs, addLog, clearLogs } from "../services/api";
+import { OrbitalLoader } from "./ui/orbital-loader";
 
 const LEVELS = ["ALL", "DEBUG", "INFO", "WARN", "ERROR"];
 
@@ -153,9 +154,8 @@ export default function LogsPage() {
                 {/* Log list */}
                 <div style={{ flex: 1, overflowY: "auto", padding: "0.5rem 0" }}>
                     {loading ? (
-                        <div style={{ padding: "3rem", textAlign: "center" }}>
-                            <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 0.75rem" }} />
-                            <p style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>Loading logs...</p>
+                        <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+                            <OrbitalLoader message="Loading logs..." />
                         </div>
                     ) : logs.length === 0 ? (
                         <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.875rem" }}>

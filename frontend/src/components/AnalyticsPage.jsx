@@ -6,12 +6,7 @@ import {
 } from "recharts";
 import DashboardLayout from "./DashboardLayout";
 import { getAnalyticsSummary } from "../services/api";
-
-const DotSpinner = () => (
-    <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
-        <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-    </div>
-);
+import { OrbitalLoader } from "./ui/orbital-loader";
 
 const AnalyticsPage = () => {
     const [data, setData] = useState(null);
@@ -30,7 +25,7 @@ const AnalyticsPage = () => {
 
     useEffect(() => { load(); }, [load]);
 
-    if (loading) return <DashboardLayout pageTitle="Analytics"><DotSpinner /></DashboardLayout>;
+    if (loading) return <DashboardLayout pageTitle="Analytics"><div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}><OrbitalLoader /></div></DashboardLayout>;
 
     const {
         total_checks = 0,

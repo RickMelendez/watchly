@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Globe, AlertTriangle, CheckCircle2, XCircle, Activity } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import { getDashboardSummary } from "../services/api";
+import { OrbitalLoader } from "./ui/orbital-loader";
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
     Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -36,7 +37,7 @@ const DashboardHome = () => {
         return (
             <DashboardLayout pageTitle="Infrastructure Overview">
                 <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
-                    <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                    <OrbitalLoader />
                 </div>
             </DashboardLayout>
         );

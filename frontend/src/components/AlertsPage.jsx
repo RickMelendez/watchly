@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle, Clock, ExternalLink, RefreshCw } from "luci
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardLayout from "./DashboardLayout";
 import api, { updateAlert } from "../services/api";
+import { OrbitalLoader } from "./ui/orbital-loader";
 
 const SEVERITY = {
     high: { color: "#ef4444", bg: "rgba(239,68,68,0.1)", border: "rgba(239,68,68,0.2)", label: "High" },
@@ -116,9 +117,8 @@ export default function AlertsPage() {
                 </div>
 
                 {loading ? (
-                    <div style={{ padding: "3rem", textAlign: "center" }}>
-                        <div style={{ width: 28, height: 28, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 0.75rem" }} />
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.8125rem", fontFamily: "JetBrains Mono, monospace" }}>Fetching alerts...</p>
+                    <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+                        <OrbitalLoader message="Fetching alerts..." />
                     </div>
                 ) : filtered.length === 0 ? (
                     <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>

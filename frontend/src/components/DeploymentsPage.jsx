@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Rocket, CheckCircle2, Clock, GitMerge, GitPullRequest, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import { getDeployments, getDeploymentSummary, addDeployment, deleteDeployment } from "../services/api";
+import { OrbitalLoader } from "./ui/orbital-loader";
 
 const statusStyle = (s) => {
     switch (s) {
@@ -190,9 +191,8 @@ export default function DeploymentsPage() {
                     <h3 style={{ margin: 0, fontSize: "0.9375rem", fontWeight: 600 }}>Deployment History</h3>
                 </div>
                 {loading ? (
-                    <div style={{ padding: "3rem", textAlign: "center" }}>
-                        <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 0.75rem" }} />
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>Loading deployments...</p>
+                    <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+                        <OrbitalLoader message="Loading deployments..." />
                     </div>
                 ) : deployments.length === 0 ? (
                     <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.875rem" }}>

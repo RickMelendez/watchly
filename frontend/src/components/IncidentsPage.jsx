@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { AlertTriangle, CheckCircle, Clock, RefreshCw, XCircle } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import api, { updateAlert } from "../services/api";
+import { OrbitalLoader } from "./ui/orbital-loader";
 
 const getSeverity = (alert_type = "") => {
     const t = alert_type.toLowerCase();
@@ -136,9 +137,8 @@ export default function IncidentsPage() {
                 </div>
 
                 {loading ? (
-                    <div style={{ padding: "3rem", textAlign: "center" }}>
-                        <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 0.75rem" }} />
-                        <p style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>Loading incidents...</p>
+                    <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+                        <OrbitalLoader message="Loading incidents..." />
                     </div>
                 ) : filtered.length === 0 ? (
                     <div style={{ padding: "3rem", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>

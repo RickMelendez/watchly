@@ -1,10 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Activity, Bell, Shield, LineChart, Zap, ArrowRight, Check } from "lucide-react";
-import { DottedSurface } from "./ui/dotted-surface";
-import { Navbar } from "./ui/3d-interactive-navbar";
-import DisplayCards from "./ui/display-cards";
-import { WordRotate } from "./ui/word-rotate";
+import { Activity, Bell, Shield, LineChart, Zap, ArrowRight } from "lucide-react";
+import { NavbarHero } from "./ui/hero-with-video";
 import Timeline01 from "./ui/release-time-line";
 import { Accordian } from "./ui/accordian";
 import { Footer } from "./ui/footer";
@@ -94,119 +91,13 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden relative">
-      {/* Background */}
-      <div className="fixed inset-0 z-0 bg-black pointer-events-none">
-        <DottedSurface />
-      </div>
-
-      {/* Interactive 3D Navbar */}
-      <div className="fixed top-0 left-0 w-full z-50">
-        <Navbar />
-      </div>
-
-      {/* Hero */}
-      <section className="container relative z-10 mx-auto px-6 pt-40 pb-28">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col items-center lg:items-start text-center lg:text-left gap-6 flex-1"
-          >
-            <motion.span
-              variants={itemVariants}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 text-green-400 text-sm font-semibold tracking-wide"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              Now in Public Beta
-            </motion.span>
-
-            <motion.h1
-              variants={itemVariants}
-              className="text-6xl md:text-8xl font-black tracking-tighter leading-[1.05]"
-            >
-              Stop Guessing.
-              <br />
-              <span className="text-green-400">
-                <WordRotate
-                  words={["Monitor Everything.", "Ship Faster.", "Sleep Better.", "Catch Errors."]}
-                  className="text-inherit pb-2 h-[1.2em]"
-                />
-              </span>
-            </motion.h1>
-
-            <motion.p
-              variants={itemVariants}
-              className="max-w-xl text-lg md:text-xl text-neutral-400 font-medium leading-relaxed"
-            >
-              The developer platform for real-time uptime monitoring, CI/CD pipeline tracking, and instant alerts. Build with confidence.
-            </motion.p>
-
-            <motion.div variants={itemVariants} className="flex items-center gap-4 pt-4">
-              <button
-                onClick={() => navigate("/login")}
-                className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-400 text-black px-7 py-3.5 rounded-lg font-bold text-base transition-colors duration-200"
-              >
-                Start Monitoring Free
-                <ArrowRight size={18} />
-              </button>
-              <button
-                onClick={() => navigate("/docs")}
-                className="px-7 py-3.5 rounded-lg font-semibold text-base border border-white/15 text-neutral-300 hover:border-white/30 hover:text-white transition-colors"
-              >
-                View Docs
-              </button>
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="flex items-center gap-6 text-sm text-neutral-500">
-              <span className="flex items-center gap-1.5"><Check size={14} className="text-green-500" /> No credit card required</span>
-              <span className="flex items-center gap-1.5"><Check size={14} className="text-green-500" /> Free forever plan</span>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex-1 w-full max-w-lg hidden lg:flex justify-center items-center"
-          >
-            <DisplayCards
-              cards={[
-                {
-                  icon: <Activity className="size-4 text-green-300" />,
-                  title: "Uptime",
-                  description: "100% Operational",
-                  date: "Just now",
-                  iconClassName: "text-green-500",
-                  titleClassName: "text-green-500",
-                  className:
-                    "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
-                },
-                {
-                  icon: <Zap className="size-4 text-blue-300" />,
-                  title: "Performance",
-                  description: "32ms Avg Response",
-                  date: "2 mins ago",
-                  iconClassName: "text-blue-500",
-                  titleClassName: "text-blue-500",
-                  className:
-                    "[grid-area:stack] translate-x-12 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
-                },
-                {
-                  icon: <Shield className="size-4 text-purple-300" />,
-                  title: "Security",
-                  description: "SSL Certificate Valid",
-                  date: "Today",
-                  iconClassName: "text-purple-500",
-                  titleClassName: "text-purple-500",
-                  className: "[grid-area:stack] translate-x-24 translate-y-20 hover:translate-y-10",
-                },
-              ]}
-            />
-          </motion.div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
+      {/* Navbar + Hero */}
+      <NavbarHero
+        brandName="Watchly"
+        heroTitle="Stop Guessing. Monitor Everything."
+        heroDescription="The developer platform for real-time uptime monitoring, CI/CD pipeline tracking, and instant alerts. Build with confidence."
+      />
 
       {/* Timeline */}
       <Timeline01 />

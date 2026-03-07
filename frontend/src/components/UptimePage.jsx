@@ -3,6 +3,7 @@ import { Activity, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import useWebsites from "../hooks/useWebsites";
 import { fetchWebsiteMetrics } from "../services/api";
+import { OrbitalLoader } from "./ui/orbital-loader";
 
 const UptimePage = () => {
     const { websites, loading: initialLoading } = useWebsites();
@@ -62,7 +63,7 @@ const UptimePage = () => {
         return (
             <DashboardLayout pageTitle="Uptime Monitor">
                 <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
-                    <div className="animate-spin" style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%" }} />
+                    <OrbitalLoader />
                 </div>
             </DashboardLayout>
         );

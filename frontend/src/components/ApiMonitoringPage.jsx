@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Zap, AlertTriangle, Clock, Globe, RefreshCw, Activity } from "lucide-react";
 import DashboardLayout from "./DashboardLayout";
 import { getApiMonitoringSummary, getTelemetryRoutes, getTelemetryTraces } from "../services/api";
+import { OrbitalLoader } from "./ui/orbital-loader";
 
 const statusStyle = (s) => {
     switch (s) {
@@ -14,10 +15,10 @@ const statusStyle = (s) => {
 
 const fmtMs = (v) => v > 0 ? `${v}ms` : "—";
 
-const timeAgo = (ts) => {
+const timeAgo = (ts, now) => {
     if (!ts) return "—";
     const normalized = typeof ts === "string" && !ts.endsWith("Z") && !ts.includes("+") ? ts + "Z" : ts;
-    const diff = Math.floor((Date.now() - new Date(normalized)) / 1000);
+    const diff = Math.floor((now - new Date(normalized)) / 1000);
     if (diff < 0) return "just now";
     if (diff < 60) return `${diff}s ago`;
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
@@ -40,9 +41,16 @@ export default function ApiMonitoringPage() {
     const [loading, setLoading] = useState(true);
     const [routeStats, setRouteStats] = useState([]);
     const [traces, setTraces] = useState([]);
+    const [now, setNow] = useState(Date.now());
 
-    const load = useCallback(async () => {
-        setLoading(true);
+    // Tick every second so timeAgo values update live
+    useEffect(() => {
+        const id = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(id);
+    }, []);
+
+    const load = useCallback(async (showSpinner = false) => {
+        if (showSpinner) setLoading(true);
         try {
             const [monRes, routesRes, tracesRes] = await Promise.allSettled([
                 getApiMonitoringSummary(),
@@ -55,13 +63,13 @@ export default function ApiMonitoringPage() {
         } catch {
             setData(null);
         } finally {
-            setLoading(false);
+            if (showSpinner) setLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        load();
-        const id = setInterval(load, 30000);
+        load(true);                                    // initial load — show spinner once
+        const id = setInterval(() => load(false), 30000); // background refresh — no flicker
         return () => clearInterval(id);
     }, [load]);
 
@@ -110,9 +118,8 @@ export default function ApiMonitoringPage() {
             </div>
 
             {loading ? (
-                <div style={{ padding: "3rem", textAlign: "center" }}>
-                    <div style={{ width: 24, height: 24, border: "2px solid var(--border)", borderTopColor: "#22c55e", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 0.75rem" }} />
-                    <p style={{ color: "var(--text-muted)", fontSize: "0.8125rem" }}>Loading monitoring data...</p>
+                <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+                    <OrbitalLoader message="Loading monitoring data..." />
                 </div>
             ) : total_endpoints === 0 ? (
                 <div className="surface" style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.875rem" }}>
@@ -284,7 +291,7 @@ export default function ApiMonitoringPage() {
                                                     </span>
                                                 </td>
                                                 <td style={{ textAlign: "right", fontFamily: "JetBrains Mono, monospace", color: t.duration_ms > 500 ? "#F59E0B" : "var(--text-secondary)" }}>{t.duration_ms}ms</td>
-                                                <td style={{ textAlign: "right", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{timeAgo(t.timestamp)}</td>
+                                                <td style={{ textAlign: "right", fontSize: "0.8125rem", color: "var(--text-muted)" }}>{timeAgo(t.timestamp, now)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
