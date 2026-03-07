@@ -147,7 +147,7 @@ const DashboardHome = () => {
                         </div>
                     ) : (
                         <>
-                            <div style={{ flex: 1, minHeight: 0 }}>
+                            <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="value" stroke="none">
@@ -158,15 +158,24 @@ const DashboardHome = () => {
                                         <RechartsTooltip contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", borderRadius: 8, fontSize: "0.8rem" }} />
                                     </PieChart>
                                 </ResponsiveContainer>
-                            </div>
-                            <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "0.75rem" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981" }} />
-                                    Up ({upCount})
+                                {/* Center label */}
+                                <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center", pointerEvents: "none" }}>
+                                    <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--text-primary)", fontFamily: "JetBrains Mono, monospace", lineHeight: 1 }}>
+                                        {upCount + downCount}
+                                    </div>
+                                    <div style={{ fontSize: "0.6rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "0.2rem" }}>
+                                        sites
+                                    </div>
                                 </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                            </div>
+                            <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", marginTop: "0.75rem" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#10B981", fontWeight: 600 }}>
+                                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981" }} />
+                                    Up &nbsp;<span style={{ fontFamily: "JetBrains Mono, monospace" }}>({upCount})</span>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.8rem", color: "#EF4444", fontWeight: 600 }}>
                                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#EF4444" }} />
-                                    Down ({downCount})
+                                    Down &nbsp;<span style={{ fontFamily: "JetBrains Mono, monospace" }}>({downCount})</span>
                                 </div>
                             </div>
                         </>
