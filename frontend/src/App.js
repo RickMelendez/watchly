@@ -23,6 +23,7 @@ import SecurityPage from "./components/SecurityPage";
 import IncidentsPage from "./components/IncidentsPage";
 import NotFound from "./components/Common/NotFound";
 import Docs from "./pages/Docs";
+import PricingPage from "./components/PricingPage";
 import "./index.css";
 
 function AppRoutes() {
@@ -55,6 +56,7 @@ function AppRoutes() {
       <Route path="/docs" element={<Docs />} />
       <Route path="/login" element={<Login onLogin={handleLogin} />} />
       <Route path="/register" element={<Login onLogin={handleLogin} />} />
+      <Route path="/pricing" element={<PricingPage />} />
 
       {/* Dashboard Routes */}
       <Route

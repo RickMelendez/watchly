@@ -4,7 +4,6 @@ import {
     Globe,
     LayoutDashboard,
     Bell,
-    Settings,
     LogOut,
     Activity,
     ChevronRight,
@@ -14,8 +13,10 @@ import {
     Rocket,
     AlertTriangle,
     FileText,
-    GitBranch
+    GitBranch,
+    Shield,
 } from "lucide-react";
+import { ThemeToggle } from "./ui/theme-toggle";
 
 const NAV = [
     {
@@ -40,7 +41,7 @@ const NAV = [
             { label: "Incidents", icon: AlertTriangle, path: "/dashboard/incidents" },
             { label: "Logs", icon: FileText, path: "/dashboard/logs" },
             { label: "API Monitoring", icon: Activity, path: "/dashboard/api-monitoring" },
-            { label: "Security", icon: Settings, path: "/dashboard/security" },
+            { label: "Security", icon: Shield, path: "/dashboard/security" },
         ],
     },
     {
@@ -280,6 +281,9 @@ export default function DashboardLayout({
                                 />
                             </button>
                         )}
+
+                        {/* Theme toggle */}
+                        <ThemeToggle />
 
                         {/* Alerts bell */}
                         <button

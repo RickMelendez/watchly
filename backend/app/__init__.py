@@ -117,6 +117,7 @@ def create_app():
     from app.routes.api_monitoring import api_monitoring_ns
     from app.routes.security import security_ns
     from app.routes.telemetry import telemetry_ns
+    from app.routes.billing import billing_ns
 
     api.add_namespace(alerts_ns, path="/alerts")  # Register namespaces
     api.add_namespace(websites_ns, path="/websites")
@@ -132,6 +133,7 @@ def create_app():
     api.add_namespace(api_monitoring_ns, path="/api-monitoring")
     api.add_namespace(security_ns, path="/security")
     api.add_namespace(telemetry_ns, path="/telemetry")
+    api.add_namespace(billing_ns, path="/billing")
 
     # Initialise OpenTelemetry HTTP tracing (must be after all namespaces are registered)
     from app.telemetry import setup_telemetry
