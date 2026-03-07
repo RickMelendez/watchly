@@ -129,6 +129,8 @@ const DashboardHome = () => {
                                     <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={v => `${v}ms`} />
                                     <RechartsTooltip
                                         contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", borderRadius: 8, fontSize: "0.8rem" }}
+                                        itemStyle={{ color: "var(--text-primary)" }}
+                                        labelStyle={{ color: "var(--text-secondary)" }}
                                         formatter={v => [`${v} ms`, "Avg Response"]}
                                     />
                                     <Area type="monotone" dataKey="response_time" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#rtGrad)" />
@@ -155,7 +157,11 @@ const DashboardHome = () => {
                                                 <Cell key={idx} fill={STATUS_COLORS[idx]} />
                                             ))}
                                         </Pie>
-                                        <RechartsTooltip contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", borderRadius: 8, fontSize: "0.8rem" }} />
+                                        <RechartsTooltip
+                                            contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", borderRadius: 8, fontSize: "0.8rem" }}
+                                            itemStyle={{ color: "var(--text-primary)" }}
+                                            labelStyle={{ color: "var(--text-secondary)" }}
+                                        />
                                     </PieChart>
                                 </ResponsiveContainer>
                                 {/* Center label */}

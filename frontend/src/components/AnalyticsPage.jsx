@@ -105,6 +105,8 @@ const AnalyticsPage = () => {
                                     <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--text-muted)", fontSize: 11 }} tickFormatter={v => `${v}ms`} />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", borderRadius: 8, fontSize: "0.8rem" }}
+                                        itemStyle={{ color: "var(--text-primary)" }}
+                                        labelStyle={{ color: "var(--text-secondary)" }}
                                         formatter={v => v !== null ? [`${v} ms`, "Avg Response"] : ["No data", ""]}
                                     />
                                     <Area type="monotone" dataKey="response_time" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#rtGrad30)" connectNulls={false} />
@@ -134,6 +136,8 @@ const AnalyticsPage = () => {
                                     <Tooltip
                                         cursor={{ fill: "rgba(255,255,255,0.03)" }}
                                         contentStyle={{ backgroundColor: "var(--bg-elevated)", borderColor: "var(--border)", borderRadius: 8, fontSize: "0.8rem" }}
+                                        itemStyle={{ color: "var(--text-primary)" }}
+                                        labelStyle={{ color: "var(--text-secondary)" }}
                                         formatter={v => [`${v} ms`, "Avg Response"]}
                                     />
                                     <Bar dataKey="avg_response_time" radius={[0, 4, 4, 0]}>
