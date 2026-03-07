@@ -1,52 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Activity, Bell, Shield, LineChart, Zap, ArrowRight, Server } from "lucide-react";
+import { Activity, Bell, Shield, Zap, ArrowRight } from "lucide-react";
 import { Navbar } from "./ui/3d-interactive-navbar";
-import Timeline01 from "./ui/release-time-line";
+
 import { Accordian } from "./ui/accordian";
+import { FeaturesSectionWithCardGradient } from "./ui/feature-section-with-card-gradient";
 import { Footer } from "./ui/footer";
 import PricingSection from "./ui/pricing-section";
 import { DottedSurface } from "./ui/dotted-surface";
 import { WordRotate } from "./ui/word-rotate";
 
-const FEATURES = [
-  {
-    icon: Activity,
-    title: "Real-Time Monitoring",
-    description: "Track uptime and response time for all your websites, 24/7.",
-    iconColor: "text-green-400",
-  },
-  {
-    icon: Bell,
-    title: "Instant Alerts",
-    description: "Get notified immediately when your sites go down via email or webhook.",
-    iconColor: "text-green-400",
-  },
-  {
-    icon: LineChart,
-    title: "Performance Analytics",
-    description: "Dive deep into historical data and performance trends.",
-    iconColor: "text-green-400",
-  },
-  {
-    icon: Shield,
-    title: "SSL & Security",
-    description: "Monitor SSL certificates and get alerts before they expire.",
-    iconColor: "text-green-400",
-  },
-  {
-    icon: Zap,
-    title: "Lightning Fast",
-    description: "Our global network checks your sites every 30 seconds.",
-    iconColor: "text-green-400",
-  },
-  {
-    icon: Server,
-    title: "CI/CD Pipelines",
-    description: "Track deployments, containers, and pipeline status in one place.",
-    iconColor: "text-green-400",
-  },
-];
 
 const FAQ_ITEMS = [
   {
@@ -78,15 +41,6 @@ const FAQ_ITEMS = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -152,9 +106,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Timeline */}
-      <Timeline01 />
-
       {/* Features Grid */}
       <section id="features" className="py-24 border-t border-white/10 relative z-10 bg-black">
         <div className="container mx-auto px-6">
@@ -166,28 +117,7 @@ const LandingPage = () => {
               A complete toolkit for monitoring the reliability, performance, and security of your modern infrastructure.
             </p>
           </div>
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {FEATURES.map((feature) => (
-              <motion.div
-                key={feature.title}
-                variants={itemVariants}
-                className="p-7 rounded-2xl border border-green-500/10 bg-black hover:border-green-500/25 hover:bg-green-500/5 transition-all duration-300 group"
-              >
-                <div className="w-11 h-11 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-5 group-hover:border-green-500/40 transition-colors">
-                  <feature.icon className={feature.iconColor} size={22} />
-                </div>
-                <h3 className="text-base font-semibold mb-2 text-white">{feature.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{feature.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
+          <FeaturesSectionWithCardGradient />
         </div>
       </section>
 
